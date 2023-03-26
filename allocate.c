@@ -12,6 +12,11 @@ typedef struct {
     int memory;
 } Process;
 
+void shortestJobFirst(Process processes[], 
+        int processCount, int memory, int quantum);
+
+// Trying to pass: ./allocate -f process.txt -s SJF -m infinite -q 3
+
 int main(int argc, char **argv) {
 
     // Storing arguments
@@ -21,6 +26,7 @@ int main(int argc, char **argv) {
     int quantum = 0;
 
     // Retrieve and store arguments
+    // NEED TO ERRORS??
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
             if (i + 1 < argc) {
@@ -58,11 +64,35 @@ int main(int argc, char **argv) {
 
     Process p;
     while (fscanf(processesFile, "%d %s %d %d", 
-        &p.arrival, p.name, &p.time, &p.memory) == 4) {
+            &p.arrival, p.name, &p.time, &p.memory) == 4) {
         processes[processesCount++] = p;
     }
 
     fclose(processesFile);
 
+    if(schedule == 0) {
+        shortestJobFirst(processes, processesCount, memory, quantum);
+    }
+
     return 0;
+}
+
+void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
+
+    // Array of process indexes, ordered by process time
+    int shortestOrder[10000]; // Some const for max processes
+
+    for (int i = 0; i < processCount; i++) {
+        shortestOrder[i] = i;
+    }
+
+    for (int i = 0; i < processCount; i++) {
+        for (int j = i + 1; j < processCount; j++) {
+            if (processes[shortestOrder[i]].time > processes[shortestOrder[j]].time) {
+                int c = shortestOrder[i];
+                shortestOrder[i] = shortestOrder[j];
+                shortestOrder[j] = c;
+            }
+        }
+    }
 }
