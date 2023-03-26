@@ -1,5 +1,5 @@
 allocate: allocate.c
-	gcc Wall -o -c allocate allocate.c
+	gcc -Wall -g -o allocate allocate.c
 
 clean:
 	rm -rf *.o
