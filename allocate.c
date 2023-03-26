@@ -74,25 +74,21 @@ int main(int argc, char **argv) {
         shortestJobFirst(processes, processesCount, memory, quantum);
     }
 
+    for(int i = 0; i < processesCount; i++) {
+        printf("%d %s %d %d\n", processes[i].arrival, processes[i].name, processes[i].time, processes[i].memory);
+    }
+
     return 0;
 }
 
+// Executing shortest job first algorithm
 void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
 
-    // Array of process indexes, ordered by process time
-    int shortestOrder[10000]; // Some const for max processes
+    int totalTime = 0;
+    int ready[10000]; // Const max eventually
+    int complete[10000];
 
-    for (int i = 0; i < processCount; i++) {
-        shortestOrder[i] = i;
-    }
-
-    for (int i = 0; i < processCount; i++) {
-        for (int j = i + 1; j < processCount; j++) {
-            if (processes[shortestOrder[i]].time > processes[shortestOrder[j]].time) {
-                int c = shortestOrder[i];
-                shortestOrder[i] = shortestOrder[j];
-                shortestOrder[j] = c;
-            }
-        }
+    while(processCount > 0) {
+        
     }
 }
