@@ -2,6 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define PROCESS_NAME_LENGTH 8
+
+// Process data structure
+typedef struct {
+    int arrival;
+    char name[PROCESS_NAME_LENGTH];
+    int time;
+    int memory;
+} Process;
+
 int main(int argc, char **argv) {
 
     // Storing arguments
@@ -36,10 +46,23 @@ int main(int argc, char **argv) {
         }
     }
 
-    printf("%s\n", file);
-    printf("%d\n", schedule);
-    printf("%d\n", memory);
-    printf("%d\n", quantum);
+    FILE *processesFile = fopen(file, "r");
+
+    if (processesFile == NULL) {
+        printf("Failed to open file.");
+        return 1;
+    }
+
+    Process processes[10000]; // Figure out const or max
+    int processesCount = 0;
+
+    Process p;
+    while (fscanf(processesFile, "%d %s %d %d", 
+        &p.arrival, p.name, &p.time, &p.memory) == 4) {
+        processes[processesCount++] = p;
+    }
+
+    fclose(processesFile);
 
     return 0;
 }
