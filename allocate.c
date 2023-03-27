@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 #define PROCESS_NAME_LENGTH 8
 
@@ -14,6 +15,7 @@ typedef struct {
 
 void shortestJobFirst(Process processes[], 
         int processCount, int memory, int quantum);
+int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 
 int main(int argc, char **argv) {
 
@@ -88,6 +90,34 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
     int remain = processCount;
 
     while (remain > 0) {
+        int shortest = shortestProcess(processes, processCount, totalTime, executed);
+
+        printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
+                totalTime, processes[shortest].name, processes[shortest].time);
+
+        // Add process' time to table and designated executed
+        totalTime += processes[shortest].time;
+        executed[shortest] = 1;
+
         remain--;
     }
+}
+
+// Finds the shortest remaining process
+int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]) {
+    int shortest = -1;
+    int minimum = INT_MAX;
+
+    // Find the index of the shortest non-executed process
+    // Always begins with the first process
+    for (int i = 0; i < processCount; i++) {
+        if (executed[i] == 0 &&
+                processes[i].time < minimum &&
+                processes[i].arrival <= totalTime) {
+            shortest = i;
+            minimum = processes[i].time;
+        }
+    }
+
+    return shortest;
 }
