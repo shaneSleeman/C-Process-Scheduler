@@ -107,6 +107,9 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
         executed[shortest] = 1;
 
         remain--;
+
+        printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
+                totalTime, processes[shortest].name, remain);
     }
 }
 
