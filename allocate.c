@@ -82,6 +82,8 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
     
     int totalTime = 0;
     int quantumTime = 0;
+    int totalTurnaround = 0;
+    int previousTurnaround = 0;
 
     // Executed processes array
     int executed[processCount];
@@ -98,6 +100,8 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
                 totalTime, processes[shortest].name, processes[shortest].time);
 
         // Add quantums passeds to total
+        // Could check for completion each quantum,
+        // but doesn't seem necessary at the moment
         // Signifying as executed
         int quantums = 0;
         while(quantums < processes[shortest].time) {
@@ -111,6 +115,8 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                 totalTime, processes[shortest].name, remain);
     }
+
+    printf("Makespan %d\n", totalTime);
 }
 
 // Finds the shortest remaining process
