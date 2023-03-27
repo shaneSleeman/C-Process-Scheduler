@@ -77,9 +77,11 @@ int main(int argc, char **argv) {
     return 0;
 }
 
+// Todo: bunch of edge cases handling
 void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
     
     int totalTime = 0;
+    int quantumTime = 0;
 
     // Executed processes array
     int executed[processCount];
@@ -88,15 +90,20 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
     }
 
     int remain = processCount;
-
+    
     while (remain > 0) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
                 totalTime, processes[shortest].name, processes[shortest].time);
 
-        // Add process' time to table and designated executed
-        totalTime += processes[shortest].time;
+        // Add quantums passeds to total
+        // Signifying as executed
+        int quantums = 0;
+        while(quantums < processes[shortest].time) {
+            quantums += quantum;
+        }
+        totalTime += quantums;
         executed[shortest] = 1;
 
         remain--;
