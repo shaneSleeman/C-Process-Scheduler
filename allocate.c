@@ -15,8 +15,6 @@ typedef struct {
 void shortestJobFirst(Process processes[], 
         int processCount, int memory, int quantum);
 
-// Trying to pass: ./allocate -f process.txt -s SJF -m infinite -q 3
-
 int main(int argc, char **argv) {
 
     // Storing arguments
@@ -74,21 +72,22 @@ int main(int argc, char **argv) {
         shortestJobFirst(processes, processesCount, memory, quantum);
     }
 
-    for(int i = 0; i < processesCount; i++) {
-        printf("%d %s %d %d\n", processes[i].arrival, processes[i].name, processes[i].time, processes[i].memory);
-    }
-
     return 0;
 }
 
-// Executing shortest job first algorithm
 void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
-
+    
     int totalTime = 0;
-    int ready[10000]; // Const max eventually
-    int complete[10000];
 
-    while(processCount > 0) {
-        
+    // Executed processes array
+    int executed[processCount];
+    for (int i = 0; i < processCount; i++) {
+        executed[i] = 0;
+    }
+
+    int remain = processCount;
+
+    while (remain > 0) {
+        remain--;
     }
 }
