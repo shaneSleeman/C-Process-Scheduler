@@ -16,6 +16,8 @@ typedef struct {
 void shortestJobFirst(Process processes[], 
         int processCount, int memory, int quantum);
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
+void roundRobin(Process processes[], int processCount, 
+        int memory, int quantum);
 
 int main(int argc, char **argv) {
 
@@ -72,6 +74,9 @@ int main(int argc, char **argv) {
 
     if(schedule == 0) {
         shortestJobFirst(processes, processesCount, memory, quantum);
+    }
+    else if(schedule == 1) {
+        roundRobin(processes, processesCount, memory, quantum);
     }
 
     return 0;
@@ -136,4 +141,45 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
     }
 
     return shortest;
+}
+
+void roundRobin(Process processes[], int processCount, int memory, int quantum) {
+    
+    int totalTime = 0;
+    int quantumTime = 0;
+    int totalTurnaround = 0;
+    int previousTurnaround = 0;
+
+    // Executed processes array
+    int executed[processCount];
+    for (int i = 0; i < processCount; i++) {
+        executed[i] = 0;
+    }
+
+    int remain = processCount;
+    
+    while (remain > 0) {
+        int shortest = shortestProcess(processes, processCount, totalTime, executed);
+
+        printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
+                totalTime, processes[shortest].name, processes[shortest].time);
+
+        // Add quantums passeds to total
+        // Could check for completion each quantum,
+        // but doesn't seem necessary at the moment
+        // Signifying as executed
+        int quantums = 0;
+        while(quantums < processes[shortest].time) {
+            quantums += quantum;
+        }
+        totalTime += quantums;
+        executed[shortest] = 1;
+
+        remain--;
+
+        printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
+                totalTime, processes[shortest].name, remain);
+    }
+
+    printf("Makespan in RR %d\n", totalTime);
 }
