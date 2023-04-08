@@ -25,6 +25,7 @@ void roundRobin(Process processes[], int processCount,
         int memory, int quantum);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
+int lowerTime(Process processes[], int processCount, int quantum);
 
 int main(int argc, char **argv) {
 
@@ -90,6 +91,7 @@ int main(int argc, char **argv) {
 }
 
 // Todo: bunch of edge cases handling
+// modify lowertime to recalculate each time
 void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
     
     int totalTime = 0;
@@ -138,12 +140,21 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
         else {
             first--;
             printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
-                totalTime, processes[shortest].name, 0);
+                totalTime, processes[shortest].name, lowerTime(processes, processCount, quantum));
         }
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
     printf("Makespan %d\n", totalTime);
+}
+
+int lowerTime(Process processes[], int processCount, int quantum) {
+    int n = 0;
+    int atLeast = processes[0].time - quantum;
+    for(int i = 1; i < processCount; i++) {
+        if(processes[i].arrival < atLeast) n++;
+    }
+    return n;
 }
 
 // Finds the shortest remaining process
