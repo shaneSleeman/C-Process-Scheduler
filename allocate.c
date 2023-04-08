@@ -211,7 +211,7 @@ void roundRobin(Process processes[], int processCount, int memory, int quantum) 
                             &maxOverhead, &totalOverhead);
 
                     printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
-                            totalTime, processes[i].name, remain);
+                            totalTime, processes[i].name, lowerTime(totalTime, executed, processes, processCount, quantum));
                 }
             }
         }
