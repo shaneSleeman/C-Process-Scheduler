@@ -2,11 +2,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <math.h>
 
 #define PROCESS_NAME_LENGTH 8
 
 // Todo: split functions, make sure other marks
-// clean files pushed
+// clean files pushed, remove folder thing
+// find more tests
 
 // Process data structure
 typedef struct {
@@ -21,6 +23,8 @@ void shortestJobFirst(Process processes[],
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 void roundRobin(Process processes[], int processCount, 
         int memory, int quantum);
+void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
+void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
 
 int main(int argc, char **argv) {
 
@@ -100,6 +104,11 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
     }
 
     int remain = processCount;
+
+    // Hold performance stats
+    int turnaround = 0;
+    double maxOverhead = 0.0;
+    double totalOverhead = 0.0;
     
     while (remain > 0) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
@@ -120,10 +129,14 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
 
         remain--;
 
+        updatePerformance(processes, totalTime, shortest, &turnaround, 
+                            &maxOverhead, &totalOverhead);
+
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                 totalTime, processes[shortest].name, remain);
     }
 
+    printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
     printf("Makespan %d\n", totalTime);
 }
 
@@ -147,7 +160,7 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
 }
 
 void roundRobin(Process processes[], int processCount, int memory, int quantum) {
-    
+
     int totalTime = 0;
     int lastExecuted = -1; // Last process, avoid reprint
 
@@ -160,6 +173,11 @@ void roundRobin(Process processes[], int processCount, int memory, int quantum) 
     }
 
     int remain = processCount;
+
+    // Hold performance stats
+    int turnaround = 0;
+    double maxOverhead = 0;
+    double totalOverhead = 0;
 
     while (remain > 0) {
         for (int i = 0; i < processCount; i++) {
@@ -181,6 +199,9 @@ void roundRobin(Process processes[], int processCount, int memory, int quantum) 
                     executed[i] = 1;
                     remain--;
 
+                    updatePerformance(processes, totalTime, i, &turnaround, 
+                            &maxOverhead, &totalOverhead);
+
                     printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                             totalTime, processes[i].name, remain);
                 }
@@ -188,5 +209,30 @@ void roundRobin(Process processes[], int processCount, int memory, int quantum) 
         }
     }
 
+    printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
     printf("Makespan %d\n", totalTime);
+}
+
+void updatePerformance(Process processes[], int totalTime, int process, int *turnaround, 
+        double *maxOverhead, double *totalOverhead) {
+    
+    // Current process' turnaround and time overhead
+    int processTurnaround = totalTime - processes[process].arrival;
+
+    // Update turnaround
+    *turnaround += processTurnaround;
+
+    // Current process' overhead
+    double processOverhead = processTurnaround / (double)processes[process].time;
+
+    // Track max overhead and update total overhead
+    if (processOverhead > *maxOverhead) {
+        *maxOverhead = processOverhead;
+    }
+    *totalOverhead += processOverhead;
+}
+
+void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount) {
+    printf("Turnaround time %d\n", (int)ceil(turnaround / (double)processCount));
+    printf("Time overhead %.2f %.2f\n", maxOverhead, totalOverhead / processCount);
 }
