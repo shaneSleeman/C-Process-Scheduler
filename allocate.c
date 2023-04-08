@@ -25,7 +25,7 @@ void roundRobin(Process processes[], int processCount,
         int memory, int quantum);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
-int lowerTime(Process processes[], int processCount, int quantum);
+int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum);
 
 int main(int argc, char **argv) {
 
@@ -91,7 +91,6 @@ int main(int argc, char **argv) {
 }
 
 // Todo: bunch of edge cases handling
-// modify lowertime to recalculate each time
 void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
     
     int totalTime = 0;
@@ -108,9 +107,6 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
     int turnaround = 0;
     double maxOverhead = 0.0;
     double totalOverhead = 0.0;
-
-    // Print remaining proc. in queue when first
-    int first = 1;
 
     while (remain > 0) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
@@ -133,26 +129,21 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
 
         updatePerformance(processes, totalTime, shortest, &turnaround, 
                             &maxOverhead, &totalOverhead);
-        if(!first) {
-            printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
-                totalTime, processes[shortest].name, remain);
-        }
-        else {
-            first--;
-            printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
-                totalTime, processes[shortest].name, lowerTime(processes, processCount, quantum));
-        }
+
+        printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
+                totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
     printf("Makespan %d\n", totalTime);
 }
 
-int lowerTime(Process processes[], int processCount, int quantum) {
+int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
     int n = 0;
-    int atLeast = processes[0].time - quantum;
+    int atLeast = totalTime - quantum;
     for(int i = 1; i < processCount; i++) {
-        if(processes[i].arrival < atLeast) n++;
+        if(processes[i].arrival < atLeast &&
+                executed[i] != 1) n++;
     }
     return n;
 }
