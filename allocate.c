@@ -93,9 +93,6 @@ int main(int argc, char **argv) {
 void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
     
     int totalTime = 0;
-    int quantumTime = 0;
-    int totalTurnaround = 0;
-    int previousTurnaround = 0;
 
     // Executed processes array
     int executed[processCount];
