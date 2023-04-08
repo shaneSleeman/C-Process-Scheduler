@@ -149,7 +149,7 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
 void roundRobin(Process processes[], int processCount, int memory, int quantum) {
     
     int totalTime = 0;
-    int lastExecuted = -1;
+    int lastExecuted = -1; // Last process, avoid reprint
 
     // Executed processes array and their remaining times
     int executed[processCount];
@@ -162,8 +162,31 @@ void roundRobin(Process processes[], int processCount, int memory, int quantum) 
     int remain = processCount;
 
     while (remain > 0) {
-        
+        for (int i = 0; i < processCount; i++) {
+
+            // If appropriate arrival and not executed yet
+            if (executed[i] == 0 && processes[i].arrival <= totalTime) {
+                totalTime += quantum;
+
+                // Only print first running instance
+                if (i != lastExecuted) {
+                    printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
+                            totalTime - quantum, processes[i].name, remainingTime[i]);
+                    lastExecuted = i;
+                }
+
+                // Finish process when no more remaining time
+                remainingTime[i] -= quantum;
+                if (remainingTime[i] <= 0) {
+                    executed[i] = 1;
+                    remain--;
+
+                    printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
+                            totalTime, processes[i].name, remain);
+                }
+            }
+        }
     }
 
-    //printf("Makespan %d\n", totalTime);
+    printf("Makespan %d\n", totalTime);
 }
