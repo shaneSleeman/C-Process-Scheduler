@@ -5,7 +5,6 @@
 #include <math.h>
 
 #define PROCESS_NAME_LENGTH 8
-#define MEMORY_CAPACITY 2048
 
 // Todo: split functions, make sure other marks
 // clean files pushed, remove folder thing
@@ -20,10 +19,10 @@ typedef struct {
 } Process;
 
 void shortestJobFirst(Process processes[], 
-        int processCount, int memoryChoice, int quantum);
+        int processCount, int memory, int quantum);
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 void roundRobin(Process processes[], int processCount, 
-        int memoryChoice, int quantum);
+        int memory, int quantum);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
 
@@ -32,7 +31,7 @@ int main(int argc, char **argv) {
     // Storing arguments
     char *file = NULL;
     int schedule = 0;
-    int memoryChoice = 0;
+    int memory = 0;
     int quantum = 0;
 
     // Retrieve and store arguments
@@ -51,7 +50,7 @@ int main(int argc, char **argv) {
         } 
         else if (!strcmp(argv[i], "-m")) {
             if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-                memoryChoice = 1;
+                memory = 1;
                 i++;
             }
         } 
@@ -81,17 +80,17 @@ int main(int argc, char **argv) {
     fclose(processesFile);
 
     if(schedule == 0) {
-        shortestJobFirst(processes, processesCount, memoryChoice, quantum);
+        shortestJobFirst(processes, processesCount, memory, quantum);
     }
     else if(schedule == 1) {
-        roundRobin(processes, processesCount, memoryChoice, quantum);
+        roundRobin(processes, processesCount, memory, quantum);
     }
 
     return 0;
 }
 
 // Todo: bunch of edge cases handling
-void shortestJobFirst(Process processes[], int processCount, int memoryChoice, int quantum) {
+void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
     
     int totalTime = 0;
 
@@ -107,7 +106,10 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
     int turnaround = 0;
     double maxOverhead = 0.0;
     double totalOverhead = 0.0;
-    
+
+    // Print remaining proc. in queue when first
+    int first = 1;
+
     while (remain > 0) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
@@ -129,9 +131,15 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
 
         updatePerformance(processes, totalTime, shortest, &turnaround, 
                             &maxOverhead, &totalOverhead);
-
-        printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
+        if(!first) {
+            printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                 totalTime, processes[shortest].name, remain);
+        }
+        else {
+            first--;
+            printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
+                totalTime, processes[shortest].name, 0);
+        }
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
@@ -157,7 +165,7 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
     return shortest;
 }
 
-void roundRobin(Process processes[], int processCount, int memoryChoice, int quantum) {
+void roundRobin(Process processes[], int processCount, int memory, int quantum) {
 
     int totalTime = 0;
     int lastExecuted = -1; // Last process, avoid reprint
