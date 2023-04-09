@@ -157,9 +157,6 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
     double maxOverhead = 0.0;
     double totalOverhead = 0.0;
 
-    // Track current memory allocation
-    int currentMemory = 0;
-
     // Memory
     int memory[MEMORY_CAPACITY];
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
@@ -224,7 +221,6 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                             lowestMultiple(processes[i].arrival, quantum),
                             processes[i].name, processes[i].memoryStart);
                     processes[i].started = 1;
-                    //currentMemory += processes[i].memory;
                 }
             }
         }
@@ -233,7 +229,6 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
         
         // Designate that the process is complete, for memory reassignment
         clearMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory);
-        currentMemory -= processes[shortest].memory;
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
@@ -289,7 +284,32 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
     double maxOverhead = 0;
     double totalOverhead = 0;
 
+    // Memory
+    int memory[MEMORY_CAPACITY];
+    for(int i = 0; i < MEMORY_CAPACITY; i++) {
+        memory[i] = -1;
+    }
+
     while (remain > 0) {
+
+        // Print when processes are ready
+        if(memoryChoice) {
+            for(int i = 0; i < processCount; i++) {
+                if(totalTime >= lowestMultiple(
+                            processes[i].arrival, quantum) &&
+                            processes[i].started == 0) {
+                    processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+
+                    printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                            lowestMultiple(processes[i].arrival, quantum),
+                            processes[i].name, processes[i].memoryStart);
+                    processes[i].started = 1;
+                    //currentMemory += processes[i].memory;
+                }
+            }
+        }
+
         for (int i = 0; i < processCount; i++) {
 
             // If appropriate arrival and not executed yet
@@ -312,8 +332,25 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                     updatePerformance(processes, totalTime, i, &turnaround, 
                             &maxOverhead, &totalOverhead);
 
+                    if(memoryChoice) {
+                        for(int i = 0; i < processCount; i++) {
+                            if(totalTime - quantum >= lowestMultiple(
+                                        processes[i].arrival, quantum) &&
+                                        processes[i].started == 0) {
+                                processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                                fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                                printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                        lowestMultiple(processes[i].arrival, quantum),
+                                        processes[i].name, processes[i].memoryStart);
+                                processes[i].started = 1;
+                            }
+                        }
+                    }
                     printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                             totalTime, processes[i].name, remain);
+
+                    // Designate that the process is complete, for memory reassignment
+                    clearMemory(memory, i, processes[i].memoryStart, processes[i].memory);
                 }
             }
         }
