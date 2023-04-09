@@ -5,6 +5,7 @@
 #include <math.h>
 
 #define PROCESS_NAME_LENGTH 8
+#define MEMORY_CAPACITY 2048
 
 // Todo: split functions, make sure other marks
 // clean files pushed, remove folder thing
@@ -19,10 +20,10 @@ typedef struct {
 } Process;
 
 void shortestJobFirst(Process processes[], 
-        int processCount, int memory, int quantum);
+        int processCount, int memoryChoice, int quantum);
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 void roundRobin(Process processes[], int processCount, 
-        int memory, int quantum);
+        int memoryChoice, int quantum);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum);
@@ -32,7 +33,7 @@ int main(int argc, char **argv) {
     // Storing arguments
     char *file = NULL;
     int schedule = 0;
-    int memory = 0;
+    int memoryChoice = 0;
     int quantum = 0;
 
     // Retrieve and store arguments
@@ -51,7 +52,7 @@ int main(int argc, char **argv) {
         } 
         else if (!strcmp(argv[i], "-m")) {
             if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-                memory = 1;
+                memoryChoice = 1;
                 i++;
             }
         } 
@@ -81,17 +82,17 @@ int main(int argc, char **argv) {
     fclose(processesFile);
 
     if(schedule == 0) {
-        shortestJobFirst(processes, processesCount, memory, quantum);
+        shortestJobFirst(processes, processesCount, memoryChoice, quantum);
     }
     else if(schedule == 1) {
-        roundRobin(processes, processesCount, memory, quantum);
+        roundRobin(processes, processesCount, memoryChoice, quantum);
     }
 
     return 0;
 }
 
 // Todo: bunch of edge cases handling
-void shortestJobFirst(Process processes[], int processCount, int memory, int quantum) {
+void shortestJobFirst(Process processes[], int processCount, int memoryChoice, int quantum) {
     
     int totalTime = 0;
 
@@ -173,7 +174,7 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
     return shortest;
 }
 
-void roundRobin(Process processes[], int processCount, int memory, int quantum) {
+void roundRobin(Process processes[], int processCount, int memoryChoice, int quantum) {
 
     int totalTime = 0;
     int lastExecuted = -1; // Last process, avoid reprint
