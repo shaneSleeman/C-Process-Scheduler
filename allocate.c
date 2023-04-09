@@ -17,7 +17,9 @@ typedef struct {
     char name[PROCESS_NAME_LENGTH];
     int time;
     int memory;
-    int ready;
+    int started;
+    int memoryStart;
+    int finished;
 } Process;
 
 void shortestJobFirst(Process processes[], 
@@ -104,6 +106,9 @@ int main(int argc, char **argv) {
 
 // Todo: bunch of edge cases handling
 void shortestJobFirst(Process processes[], int processCount, int memoryChoice, int quantum) {
+
+    // Holds the memory
+    Process memory[MEMORY_CAPACITY];
     
     int totalTime = 0;
 
@@ -138,11 +143,11 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
             for(int i = 0; i < processCount; i++) {
                 if(totalTime >= lowestMultiple(
                             processes[i].arrival, quantum) &&
-                            processes[i].ready == 0) {
+                            processes[i].started == 0) {
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
                             processes[i].name, currentMemory);
-                    processes[i].ready = 1;
+                    processes[i].started = 1;
                     currentMemory += processes[i].memory;
                 }
             }
@@ -171,11 +176,11 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
             for(int i = 0; i < processCount; i++) {
                 if(totalTime - quantum >= lowestMultiple(
                             processes[i].arrival, quantum) &&
-                            processes[i].ready == 0) {
+                            processes[i].started == 0) {
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
                             processes[i].name, currentMemory);
-                    processes[i].ready = 1;
+                    processes[i].started = 1;
                     currentMemory += processes[i].memory;
                 }
             }
