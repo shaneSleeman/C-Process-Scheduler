@@ -120,6 +120,9 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
     double maxOverhead = 0.0;
     double totalOverhead = 0.0;
 
+    // Track current memory allocation
+    int currentMemory = 0;
+
     while (remain > 0) {
 
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
@@ -133,15 +136,16 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
         // Print when processes are ready
         if(memoryChoice) {
             for(int i = 0; i < processCount; i++) {
-            if(totalTime >= lowestMultiple(
-                        processes[i].arrival, quantum) &&
-                        processes[i].ready == 0) {
-                printf("%d,READY,process_name=%s,assigned_at=%d\n", 
-                        lowestMultiple(processes[i].arrival, quantum),
-                        processes[i].name,0);
-                processes[i].ready = 1;
+                if(totalTime >= lowestMultiple(
+                            processes[i].arrival, quantum) &&
+                            processes[i].ready == 0) {
+                    printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                            lowestMultiple(processes[i].arrival, quantum),
+                            processes[i].name, currentMemory);
+                    processes[i].ready = 1;
+                    currentMemory += processes[i].memory;
+                }
             }
-        }
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
@@ -170,13 +174,15 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                             processes[i].ready == 0) {
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
-                            processes[i].name,0);
+                            processes[i].name, currentMemory);
                     processes[i].ready = 1;
+                    currentMemory += processes[i].memory;
                 }
             }
         }
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                 totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
+        currentMemory -= processes[shortest].memory;
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
