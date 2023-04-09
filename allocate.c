@@ -242,5 +242,5 @@ void updatePerformance(Process processes[], int totalTime, int process, int *tur
 
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount) {
     printf("Turnaround time %d\n", (int)ceil(turnaround / (double)processCount));
-    printf("Time overhead %.2f %.2f\n", maxOverhead, totalOverhead / processCount);
+    printf("Time overhead %.2f %.2f\n", round(maxOverhead * 100) / 100, round(totalOverhead / processCount * 100) / 100);
 }
