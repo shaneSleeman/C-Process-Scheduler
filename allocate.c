@@ -29,9 +29,11 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
         if(memory[i] != -1) {
             tally = 0;
-            currentLocation = i;
         }
         else {
+            if(tally == 0) {
+                currentLocation = i;
+            }
             tally++;
         }
         if(tally == length) return currentLocation;
