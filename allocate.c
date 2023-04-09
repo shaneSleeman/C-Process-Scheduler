@@ -131,15 +131,17 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
         }
 
         // Print when processes are ready
-        for(int i = 0; i < processCount; i++) {
+        if(memoryChoice) {
+            for(int i = 0; i < processCount; i++) {
             if(totalTime >= lowestMultiple(
                         processes[i].arrival, quantum) &&
                         processes[i].ready == 0) {
-                printf("%d,READY,process_name=%s,proc_remaining=%d\n", 
+                printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                         lowestMultiple(processes[i].arrival, quantum),
                         processes[i].name,0);
                 processes[i].ready = 1;
             }
+        }
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
@@ -161,14 +163,16 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
         updatePerformance(processes, totalTime, shortest, &turnaround, 
                             &maxOverhead, &totalOverhead);
 
-        for(int i = 0; i < processCount; i++) {
-            if(totalTime - quantum >= lowestMultiple(
-                        processes[i].arrival, quantum) &&
-                        processes[i].ready == 0) {
-                printf("%d,READY,process_name=%s,proc_remaining=%d\n", 
-                        lowestMultiple(processes[i].arrival, quantum),
-                        processes[i].name,0);
-                processes[i].ready = 1;
+        if(memoryChoice) {
+            for(int i = 0; i < processCount; i++) {
+                if(totalTime - quantum >= lowestMultiple(
+                            processes[i].arrival, quantum) &&
+                            processes[i].ready == 0) {
+                    printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                            lowestMultiple(processes[i].arrival, quantum),
+                            processes[i].name,0);
+                    processes[i].ready = 1;
+                }
             }
         }
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
