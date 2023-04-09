@@ -19,37 +19,38 @@ typedef struct {
     int memory;
     int started;
     int memoryStart;
-    int finished;
 } Process;
-
-// See if a memory location has been taken
-int memoryTaken(int location, Process processes[], int processCount) {
-    for(int i = 0; i < processCount; i++) {
-        if(location > processes[i].memoryStart &&
-                location < processes[i].memoryStart + processes[i].memory &&
-                processes[i].finished == 0) {
-            return 1;
-        }
-    }
-    return 0;
-}
 
 // Next free memory location for a given memory size
 // Imperfect implementation, must fix for bestfit
-int nextFree(int memory, Process processes[], int processCount) {
+int nextFree(int memory[], Process processes[], int processCount, int length) {
     int currentLocation = 0;
     int tally = 0;
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
-        if(memoryTaken(i, processes, processCount)) {
+        if(memory[i] != -1) {
             tally = 0;
             currentLocation = i;
         }
         else {
             tally++;
         }
-        if(tally == memory) return currentLocation;
+        if(tally == length) return currentLocation;
     }
     return 0;
+}
+
+// Assigning and clearing memory functions
+// will combine
+void fillMemory(int memory[], int i, int start, int length) {
+    for(int j = start; j < start + length; j++) {
+        memory[j] = i;
+    }
+}
+
+void clearMemory(int memory[], int i, int start, int length) {
+    for(int j = start; j < start + length; j++) {
+        memory[j] = -1;
+    }
 }
 
 void shortestJobFirst(Process processes[], 
@@ -119,7 +120,6 @@ int main(int argc, char **argv) {
     Process p;
     p.started = 0;
     p.memoryStart = 0;
-    p.finished = 0;
     while (fscanf(processesFile, "%d %s %d %d", 
             &p.arrival, p.name, &p.time, &p.memory) == 4) {
         processes[processesCount++] = p;
@@ -158,6 +158,12 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
     // Track current memory allocation
     int currentMemory = 0;
 
+    // Memory
+    int memory[MEMORY_CAPACITY];
+    for(int i = 0; i < MEMORY_CAPACITY; i++) {
+        memory[i] = -1;
+    }
+
     while (remain > 0) {
 
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
@@ -174,7 +180,9 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                 if(totalTime >= lowestMultiple(
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
-                    processes[i].memoryStart = nextFree(processes[i].memory, processes, processCount);
+                    processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
                             processes[i].name, processes[i].memoryStart);
@@ -208,7 +216,8 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                 if(totalTime - quantum >= lowestMultiple(
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
-                    processes[i].memoryStart = nextFree(processes[i].memory, processes, processCount);
+                    processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
                             processes[i].name, processes[i].memoryStart);
@@ -221,7 +230,7 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                 totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
         
         // Designate that the process is complete, for memory reassignment
-        processes[shortest].finished = 1;
+        clearMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory);
         currentMemory -= processes[shortest].memory;
     }
 
