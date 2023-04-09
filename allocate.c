@@ -111,6 +111,12 @@ void shortestJobFirst(Process processes[], int processCount, int memory, int qua
     while (remain > 0) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
+        // If none available to execute
+        if (shortest == -1) {
+            totalTime++;
+            continue;
+        }
+
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
                 totalTime, processes[shortest].name, processes[shortest].time);
 
