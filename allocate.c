@@ -22,6 +22,36 @@ typedef struct {
     int finished;
 } Process;
 
+// See if a memory location has been taken
+int memoryTaken(int location, Process processes[], int processCount) {
+    for(int i = 0; i < processCount; i++) {
+        if(location > processes[i].memoryStart &&
+                location < processes[i].memoryStart + processes[i].memory &&
+                processes[i].finished == 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+// Next free memory location for a given memory size
+// Imperfect implementation, must fix for bestfit
+int nextFree(int memory, Process processes[], int processCount) {
+    int currentLocation = 0;
+    int tally = 0;
+    for(int i = 0; i < MEMORY_CAPACITY; i++) {
+        if(memoryTaken(i, processes, processCount)) {
+            tally = 0;
+            currentLocation = i;
+        }
+        else {
+            tally++;
+        }
+        if(tally == memory) return currentLocation;
+    }
+    return 0;
+}
+
 void shortestJobFirst(Process processes[], 
         int processCount, int memoryChoice, int quantum);
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
@@ -87,8 +117,11 @@ int main(int argc, char **argv) {
     int processesCount = 0;
 
     Process p;
+    p.started = 0;
+    p.memoryStart = 0;
+    p.finished = 0;
     while (fscanf(processesFile, "%d %s %d %d", 
-            &p.arrival, p.name, &p.time, &p.memory, 0) == 4) {
+            &p.arrival, p.name, &p.time, &p.memory) == 4) {
         processes[processesCount++] = p;
     }
 
@@ -106,9 +139,6 @@ int main(int argc, char **argv) {
 
 // Todo: bunch of edge cases handling
 void shortestJobFirst(Process processes[], int processCount, int memoryChoice, int quantum) {
-
-    // Holds the memory
-    Process memory[MEMORY_CAPACITY];
     
     int totalTime = 0;
 
@@ -144,11 +174,12 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                 if(totalTime >= lowestMultiple(
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
+                    processes[i].memoryStart = nextFree(processes[i].memory, processes, processCount);
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
-                            processes[i].name, currentMemory);
+                            processes[i].name, processes[i].memoryStart);
                     processes[i].started = 1;
-                    currentMemory += processes[i].memory;
+                    //currentMemory += processes[i].memory;
                 }
             }
         }
@@ -177,16 +208,20 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                 if(totalTime - quantum >= lowestMultiple(
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
+                    processes[i].memoryStart = nextFree(processes[i].memory, processes, processCount);
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
-                            processes[i].name, currentMemory);
+                            processes[i].name, processes[i].memoryStart);
                     processes[i].started = 1;
-                    currentMemory += processes[i].memory;
+                    //currentMemory += processes[i].memory;
                 }
             }
         }
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                 totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
+        
+        // Designate that the process is complete, for memory reassignment
+        processes[shortest].finished = 1;
         currentMemory -= processes[shortest].memory;
     }
 
