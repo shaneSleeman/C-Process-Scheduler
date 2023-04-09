@@ -17,6 +17,7 @@ typedef struct {
     char name[PROCESS_NAME_LENGTH];
     int time;
     int memory;
+    int ready;
 } Process;
 
 void shortestJobFirst(Process processes[], 
@@ -85,7 +86,7 @@ int main(int argc, char **argv) {
 
     Process p;
     while (fscanf(processesFile, "%d %s %d %d", 
-            &p.arrival, p.name, &p.time, &p.memory) == 4) {
+            &p.arrival, p.name, &p.time, &p.memory, 0) == 4) {
         processes[processesCount++] = p;
     }
 
@@ -131,11 +132,13 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
 
         // Print when processes are ready
         for(int i = 0; i < processCount; i++) {
-            if(totalTime == lowestMultiple(
-                        processes[i].arrival, quantum)) {
+            if(totalTime >= lowestMultiple(
+                        processes[i].arrival, quantum) &&
+                        processes[i].ready == 0) {
                 printf("%d,READY,process_name=%s,proc_remaining=%d\n", 
                         lowestMultiple(processes[i].arrival, quantum),
                         processes[i].name,0);
+                processes[i].ready = 1;
             }
         }
 
@@ -158,6 +161,16 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
         updatePerformance(processes, totalTime, shortest, &turnaround, 
                             &maxOverhead, &totalOverhead);
 
+        for(int i = 0; i < processCount; i++) {
+            if(totalTime - quantum >= lowestMultiple(
+                        processes[i].arrival, quantum) &&
+                        processes[i].ready == 0) {
+                printf("%d,READY,process_name=%s,proc_remaining=%d\n", 
+                        lowestMultiple(processes[i].arrival, quantum),
+                        processes[i].name,0);
+                processes[i].ready = 1;
+            }
+        }
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                 totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
     }
