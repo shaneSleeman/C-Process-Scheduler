@@ -28,6 +28,16 @@ void printPerformance(int turnaround, double maxOverhead, double totalOverhead, 
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum);
 
+// Simplifies use of quantum time by checking
+// arrival times are multiples of quantum
+int lowestMultiple(int n, int i) {
+    int result = (n / i) * i;
+    if (result < n) {
+        result += i;
+    }
+    return result;
+}
+
 int main(int argc, char **argv) {
 
     // Storing arguments
@@ -110,12 +120,23 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
     double totalOverhead = 0.0;
 
     while (remain > 0) {
+
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
         if (shortest == -1) {
             totalTime++;
             continue;
+        }
+
+        // Print when processes are ready
+        for(int i = 0; i < processCount; i++) {
+            if(totalTime == lowestMultiple(
+                        processes[i].arrival, quantum)) {
+                printf("%d,READY,process_name=%s,proc_remaining=%d\n", 
+                        lowestMultiple(processes[i].arrival, quantum),
+                        processes[i].name,0);
+            }
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
