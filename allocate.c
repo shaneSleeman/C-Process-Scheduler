@@ -8,21 +8,18 @@
 #include "helper.h"
 #include "process.h"
 
-// Todo: split functions, make sure other marks
-// clean files pushed, remove folder thing
-// find more tests
+// Todo:
+// split functions, make sure other marks
+// clean files pushed
+// more tests
+// clean notation and var names
+// attempt task 4
+// line widths
+// handle errors
 
-void shortestJobFirst(Process processes[], 
-        int processCount, int memoryChoice, int quantum);
-void roundRobin(Process processes[], int processCount, 
-        int memoryChoice, int quantum);
-int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
-void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
-void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
-int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum);
-void modifyMemory(int memory[], int i, int start, int length, int fill);
-int lowestMultiple(int n, int i);
-int nextFree(int memory[], Process processes[], int processCount, int length);
+
+void scheduler(Process processes[], int processCount, 
+        int memoryChoice, int quantum, int sjf);
 
 int main(int argc, char **argv) {
 
@@ -80,24 +77,29 @@ int main(int argc, char **argv) {
     fclose(processesFile);
 
     if(schedule == 0) {
-        shortestJobFirst(processes, processesCount, memoryChoice, quantum);
+        scheduler(processes, processesCount, memoryChoice, quantum, 1);
     }
     else if(schedule == 1) {
-        roundRobin(processes, processesCount, memoryChoice, quantum);
+        scheduler(processes, processesCount, memoryChoice, quantum, 0);
     }
 
     return 0;
 }
 
 // Todo: bunch of edge cases handling
-void shortestJobFirst(Process processes[], int processCount, int memoryChoice, int quantum) {
+void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, int sjf) {
     
     int totalTime = 0;
+    int lastExecuted = -1; // Last process, avoid reprint
 
-    // Executed processes array
+    // Executed processes array and their remaining times
     int executed[processCount];
+    int remainingTime[processCount];
+    int prevRemainingTime[processCount];
     for (int i = 0; i < processCount; i++) {
         executed[i] = 0;
+        remainingTime[i] = processes[i].time;
+        prevRemainingTime[i] = -1;
     }
 
     int remain = processCount;
@@ -112,10 +114,20 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
         memory[i] = -1;
     }
+    
+    // Aiding bug fix
+    int prevProcess = 0;
 
     while (remain > 0) {
+        
+        // Avoids accidental quantum skips
+        int readyTime = -1;
 
-        int shortest = shortestProcess(processes, processCount, totalTime, executed);
+        // Print when processes are ready
+        int previousRunning = -1;
+        
+        if(sjf) {
+            int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
         if (shortest == -1) {
@@ -179,53 +191,10 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
         
         // Designate that the process is complete, for memory reassignment
         modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
-    }
+        }
 
-    printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
-    printf("Makespan %d\n", totalTime);
-}
-
-// PROBLEM: best-fit introduces ready delay...
-// may also be problem with sjf
-void roundRobin(Process processes[], int processCount, int memoryChoice, int quantum) {
-
-    int totalTime = 0;
-    int lastExecuted = -1; // Last process, avoid reprint
-
-    // Executed processes array and their remaining times
-    int executed[processCount];
-    int remainingTime[processCount];
-    int prevRemainingTime[processCount];
-    for (int i = 0; i < processCount; i++) {
-        executed[i] = 0;
-        remainingTime[i] = processes[i].time;
-        prevRemainingTime[i] = -1;
-    }
-
-    int remain = processCount;
-
-    // Hold performance stats
-    int turnaround = 0;
-    double maxOverhead = 0;
-    double totalOverhead = 0;
-
-    // Memory
-    int memory[MEMORY_CAPACITY];
-    for(int i = 0; i < MEMORY_CAPACITY; i++) {
-        memory[i] = -1;
-    }
-
-    // Aiding bug fix
-    int prevProcess = 0;
-
-    while (remain > 0) {
-
-        // Avoids accidental quantum skips
-        int readyTime = -1;
-
-        // Print when processes are ready
-        int previousRunning = -1;
-        for (int i = 0; i < processCount; i++) {
+        else {
+            for (int i = 0; i < processCount; i++) {
 
             // Avoid incorrect run order
             int printedReady = 0;
@@ -327,6 +296,7 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                     if(memoryChoice) break;
                 }
             }
+        }
         }
     }
 
