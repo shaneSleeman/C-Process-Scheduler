@@ -22,7 +22,7 @@
 void scheduler(Process processes[], int processCount, 
         int memoryChoice, int quantum, int sjf);
 
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, offset);
+void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, int offset);
 
 int main(int argc, char **argv) {
 
