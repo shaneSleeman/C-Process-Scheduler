@@ -356,8 +356,10 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                         totalTime += quantum;
                         remainingTime[prevProcess] -= quantum;
                     }
-                    if(totalTime - quantum < previousRunning) {
-                        totalTime = quantum + quantum + previousRunning;
+                    if(memoryChoice) {
+                        if(totalTime - quantum < previousRunning) {
+                            totalTime = quantum + quantum + previousRunning;
+                        }
                     }
                     printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
                             totalTime - quantum, processes[i].name, remainingTime[i]);
