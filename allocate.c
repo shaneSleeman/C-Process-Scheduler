@@ -139,7 +139,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
                 // Print when processes are ready
                 if(memoryChoice) {
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1);
+                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0);
                 }
 
                 printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
@@ -162,7 +162,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                                     &maxOverhead, &totalOverhead);
 
                 if(memoryChoice) {
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0);
+                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1);
                 }
                 
                 printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
