@@ -400,7 +400,7 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                     clearMemory(memory, i, processes[i].memoryStart, processes[i].memory);
                     
                     // End current iteration to avoid incorrect order
-                    break;
+                    if(memoryChoice) break;
                 }
             }
         }
