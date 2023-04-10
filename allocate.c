@@ -38,7 +38,9 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
         }
         if(tally == length) return currentLocation;
     }
-    return 0;
+
+    // Flag for when there's no free memory, 0 if break
+    return -1;
 }
 
 // Assigning and clearing memory functions
@@ -264,6 +266,8 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
     return shortest;
 }
 
+// PROBLEM: best-fit introduces ready delay...
+// may also be problem with sjf
 void roundRobin(Process processes[], int processCount, int memoryChoice, int quantum) {
 
     int totalTime = 0;
@@ -298,14 +302,15 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                 if(totalTime >= lowestMultiple(
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
-                    processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                    if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
+                        processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                        fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
 
-                    printf("%d,READY,process_name=%s,assigned_at=%d\n", 
-                            lowestMultiple(processes[i].arrival, quantum),
-                            processes[i].name, processes[i].memoryStart);
-                    processes[i].started = 1;
-                    //currentMemory += processes[i].memory;
+                        printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                lowestMultiple(totalTime, quantum),
+                                processes[i].name, processes[i].memoryStart);
+                        processes[i].started = 1;
+                    }
                 }
             }
         }
@@ -313,7 +318,7 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
         for (int i = 0; i < processCount; i++) {
 
             // If appropriate arrival and not executed yet
-            if (executed[i] == 0 && processes[i].arrival <= totalTime) {
+            if (executed[i] == 0 && processes[i].arrival <= totalTime && processes[i].started == 1) {
                 totalTime += quantum;
 
                 // Only print first running instance
@@ -337,12 +342,14 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                             if(totalTime - quantum >= lowestMultiple(
                                         processes[i].arrival, quantum) &&
                                         processes[i].started == 0) {
-                                processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                                fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
-                                printf("%d,READY,process_name=%s,assigned_at=%d\n", 
-                                        lowestMultiple(processes[i].arrival, quantum),
-                                        processes[i].name, processes[i].memoryStart);
-                                processes[i].started = 1;
+                                if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
+                                    processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                                    printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                            lowestMultiple(totalTime, quantum),
+                                            processes[i].name, processes[i].memoryStart);
+                                    processes[i].started = 1;
+                                }
                             }
                         }
                     }
