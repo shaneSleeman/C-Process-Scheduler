@@ -277,9 +277,11 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
     // Executed processes array and their remaining times
     int executed[processCount];
     int remainingTime[processCount];
+    int prevRemainingTime[processCount];
     for (int i = 0; i < processCount; i++) {
         executed[i] = 0;
         remainingTime[i] = processes[i].time;
+        prevRemainingTime[i] = -1;
     }
 
     int remain = processCount;
@@ -361,11 +363,15 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                             totalTime = quantum + quantum + previousRunning;
                         }
                     }
+                    if(prevRemainingTime[i] == remainingTime[i]) {
+                        remainingTime[i] -= quantum;
+                    }
                     printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
                             totalTime - quantum, processes[i].name, remainingTime[i]);
                     prevProcess = i;
                     lastExecuted = i;
                     previousRunning = totalTime - quantum;
+                    prevRemainingTime[i] = remainingTime[i];
                 }
 
                 // Finish process when no more remaining time
