@@ -318,7 +318,11 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
         for (int i = 0; i < processCount; i++) {
 
             // If appropriate arrival and not executed yet
-            if (executed[i] == 0 && processes[i].arrival <= totalTime && processes[i].started == 1) {
+            int startedCheck = 1;
+            if(memoryChoice == 1) {
+                startedCheck = processes[i].started == 1;
+            }
+            if (executed[i] == 0 && processes[i].arrival <= totalTime && startedCheck) {
                 totalTime += quantum;
 
                 // Only print first running instance
