@@ -73,6 +73,7 @@ int lowestMultiple(int n, int i) {
     if (result < n) {
         result += i;
     }
+
     return result;
 }
 
@@ -294,42 +295,66 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
         memory[i] = -1;
     }
 
+    // Aiding bug fix
+    int prevProcess = 0;
+
     while (remain > 0) {
 
-        // Print when processes are ready
-        if(memoryChoice) {
-            for(int i = 0; i < processCount; i++) {
-                if(totalTime >= lowestMultiple(
-                            processes[i].arrival, quantum) &&
-                            processes[i].started == 0) {
-                    if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
-                        processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                        fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+        // Avoids accidental quantum skips
+        int readyTime = -1;
 
-                        printf("%d,READY,process_name=%s,assigned_at=%d\n", 
-                                lowestMultiple(totalTime, quantum),
-                                processes[i].name, processes[i].memoryStart);
-                        processes[i].started = 1;
+        // Print when processes are ready
+        int previousRunning = -1;
+        for (int i = 0; i < processCount; i++) {
+
+            if(memoryChoice) {
+                for(int i = 0; i < processCount; i++) {
+                    if(totalTime >= lowestMultiple(
+                                processes[i].arrival, quantum) &&
+                                processes[i].started == 0) {
+                        if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
+                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                            fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                            readyTime = totalTime;
+
+                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                    lowestMultiple(totalTime, quantum),
+                                    processes[i].name, processes[i].memoryStart);
+                            processes[i].started = 1;
+                        }
                     }
                 }
             }
-        }
 
-        for (int i = 0; i < processCount; i++) {
-
-            // If appropriate arrival and not executed yet
+            // For best-fit, only start process if it's started
             int startedCheck = 1;
             if(memoryChoice == 1) {
                 startedCheck = processes[i].started == 1;
             }
+
+            // If appropriate arrival and not executed yet
             if (executed[i] == 0 && processes[i].arrival <= totalTime && startedCheck) {
                 totalTime += quantum;
 
+                // Fix quantum skip bug
+                if(readyTime != -1 && readyTime != totalTime - quantum) {
+                    totalTime = readyTime + quantum;
+                    remainingTime[prevProcess] += quantum;
+                }
+
                 // Only print first running instance
                 if (i != lastExecuted) {
+
+                    // Avoid time lag
+                    if(previousRunning == totalTime - quantum) {
+                        totalTime += quantum;
+                        remainingTime[prevProcess] -= quantum;
+                    }
                     printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
                             totalTime - quantum, processes[i].name, remainingTime[i]);
+                    prevProcess = i;
                     lastExecuted = i;
+                    previousRunning = totalTime - quantum;
                 }
 
                 // Finish process when no more remaining time
@@ -364,6 +389,8 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                     clearMemory(memory, i, processes[i].memoryStart, processes[i].memory);
                 }
             }
+            
+            //if(ran) totalTime += quantum;
         }
     }
 
