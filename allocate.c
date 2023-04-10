@@ -139,7 +139,19 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
                 // Print when processes are ready
                 if(memoryChoice) {
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf);
+                    for(int i = 0; i < processCount; i++) {
+                        if(totalTime >= lowestMultiple(
+                                    processes[i].arrival, quantum) &&
+                                    processes[i].started == 0) {
+                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
+
+                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                    lowestMultiple(processes[i].arrival, quantum),
+                                    processes[i].name, processes[i].memoryStart);
+                            processes[i].started = 1;
+                        }
+                    }
                 }
 
                 printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
@@ -162,7 +174,18 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                                     &maxOverhead, &totalOverhead);
 
                 if(memoryChoice) {
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf);
+                    for(int i = 0; i < processCount; i++) {
+                        if(totalTime - quantum >= lowestMultiple(
+                                    processes[i].arrival, quantum) &&
+                                    processes[i].started == 0) {
+                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
+                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                    lowestMultiple(processes[i].arrival, quantum),
+                                    processes[i].name, processes[i].memoryStart);
+                            processes[i].started = 1;
+                        }
+                    }
                 }
                 
                 printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
@@ -246,9 +269,24 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                             updatePerformance(processes, totalTime, i, &turnaround, 
                                     &maxOverhead, &totalOverhead);
 
+                            /*
                             if(memoryChoice) {
-                                readyProcess(processCount, totalTime, quantum, memory, processes, 1);
+                                for(int i = 0; i < processCount; i++) {
+                                    if(totalTime - quantum >= lowestMultiple(
+                                                processes[i].arrival, quantum) &&
+                                                processes[i].started == 0) {
+                                        if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
+                                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
+                                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                                    lowestMultiple(totalTime, quantum),
+                                                    processes[i].name, processes[i].memoryStart);
+                                            processes[i].started = 1;
+                                        }
+                                    }
+                                }
                             }
+                            */
                             printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
                                     totalTime, processes[i].name, remain);
 
