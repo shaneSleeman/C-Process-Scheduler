@@ -307,6 +307,9 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
         int previousRunning = -1;
         for (int i = 0; i < processCount; i++) {
 
+            // Avoid incorrect run order
+            int printedReady = 0;
+
             if(memoryChoice) {
                 for(int i = 0; i < processCount; i++) {
                     if(totalTime >= lowestMultiple(
@@ -321,10 +324,13 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                                     lowestMultiple(totalTime, quantum),
                                     processes[i].name, processes[i].memoryStart);
                             processes[i].started = 1;
+                            printedReady++;
                         }
                     }
                 }
             }
+
+            //if(printedReady) break;
 
             // For best-fit, only start process if it's started
             int startedCheck = 1;
@@ -349,6 +355,9 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                     if(previousRunning == totalTime - quantum) {
                         totalTime += quantum;
                         remainingTime[prevProcess] -= quantum;
+                    }
+                    if(totalTime - quantum < previousRunning) {
+                        totalTime = quantum + quantum + previousRunning;
                     }
                     printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
                             totalTime - quantum, processes[i].name, remainingTime[i]);
@@ -387,10 +396,11 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
 
                     // Designate that the process is complete, for memory reassignment
                     clearMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                    
+                    // End current iteration to avoid incorrect order
+                    break;
                 }
             }
-            
-            //if(ran) totalTime += quantum;
         }
     }
 
