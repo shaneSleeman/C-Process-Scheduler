@@ -4,78 +4,25 @@
 #include <limits.h>
 #include <math.h>
 
-#define PROCESS_NAME_LENGTH 8
-#define MEMORY_CAPACITY 2048
+// Defined helper functions
+#include "helper.h"
+#include "process.h"
 
 // Todo: split functions, make sure other marks
 // clean files pushed, remove folder thing
 // find more tests
 
-// Process data structure
-typedef struct {
-    int arrival;
-    char name[PROCESS_NAME_LENGTH];
-    int time;
-    int memory;
-    int started;
-    int memoryStart;
-} Process;
-
-// Next free memory location for a given memory size
-// Imperfect implementation, must fix for bestfit
-int nextFree(int memory[], Process processes[], int processCount, int length) {
-    int currentLocation = 0;
-    int tally = 0;
-    for(int i = 0; i < MEMORY_CAPACITY; i++) {
-        if(memory[i] != -1) {
-            tally = 0;
-        }
-        else {
-            if(tally == 0) {
-                currentLocation = i;
-            }
-            tally++;
-        }
-        if(tally == length) return currentLocation;
-    }
-
-    // Flag for when there's no free memory, 0 if break
-    return -1;
-}
-
-// Assigning and clearing memory functions
-// will combine
-void fillMemory(int memory[], int i, int start, int length) {
-    for(int j = start; j < start + length; j++) {
-        memory[j] = i;
-    }
-}
-
-void clearMemory(int memory[], int i, int start, int length) {
-    for(int j = start; j < start + length; j++) {
-        memory[j] = -1;
-    }
-}
-
 void shortestJobFirst(Process processes[], 
         int processCount, int memoryChoice, int quantum);
-int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 void roundRobin(Process processes[], int processCount, 
         int memoryChoice, int quantum);
+int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum);
-
-// Simplifies use of quantum time by checking
-// arrival times are multiples of quantum
-int lowestMultiple(int n, int i) {
-    int result = (n / i) * i;
-    if (result < n) {
-        result += i;
-    }
-
-    return result;
-}
+void modifyMemory(int memory[], int i, int start, int length, int fill);
+int lowestMultiple(int n, int i);
+int nextFree(int memory[], Process processes[], int processCount, int length);
 
 int main(int argc, char **argv) {
 
@@ -183,7 +130,7 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
                     processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                    modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
 
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
@@ -219,7 +166,7 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                             processes[i].arrival, quantum) &&
                             processes[i].started == 0) {
                     processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                    modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(processes[i].arrival, quantum),
                             processes[i].name, processes[i].memoryStart);
@@ -231,40 +178,11 @@ void shortestJobFirst(Process processes[], int processCount, int memoryChoice, i
                 totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
         
         // Designate that the process is complete, for memory reassignment
-        clearMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory);
+        modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
     printf("Makespan %d\n", totalTime);
-}
-
-int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
-    int n = 0;
-    int atLeast = totalTime - quantum;
-    for(int i = 1; i < processCount; i++) {
-        if(processes[i].arrival < atLeast &&
-                executed[i] != 1) n++;
-    }
-    return n;
-}
-
-// Finds the shortest remaining process
-int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]) {
-    int shortest = -1;
-    int minimum = INT_MAX;
-
-    // Find the index of the shortest non-executed process
-    // Always begins with the first process
-    for (int i = 0; i < processCount; i++) {
-        if (executed[i] == 0 &&
-                processes[i].time < minimum &&
-                processes[i].arrival <= totalTime) {
-            shortest = i;
-            minimum = processes[i].time;
-        }
-    }
-
-    return shortest;
 }
 
 // PROBLEM: best-fit introduces ready delay...
@@ -319,7 +237,7 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                                 processes[i].started == 0) {
                         if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
                             processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                            fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
                             readyTime = totalTime;
 
                             printf("%d,READY,process_name=%s,assigned_at=%d\n", 
@@ -390,7 +308,7 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                                         processes[i].started == 0) {
                                 if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
                                     processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                                    fillMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                                    modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
                                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                                             lowestMultiple(totalTime, quantum),
                                             processes[i].name, processes[i].memoryStart);
@@ -403,7 +321,7 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
                             totalTime, processes[i].name, remain);
 
                     // Designate that the process is complete, for memory reassignment
-                    clearMemory(memory, i, processes[i].memoryStart, processes[i].memory);
+                    modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0);
                     
                     // End current iteration to avoid incorrect order
                     if(memoryChoice) break;
@@ -414,28 +332,4 @@ void roundRobin(Process processes[], int processCount, int memoryChoice, int qua
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
     printf("Makespan %d\n", totalTime);
-}
-
-void updatePerformance(Process processes[], int totalTime, int process, int *turnaround, 
-        double *maxOverhead, double *totalOverhead) {
-    
-    // Current process' turnaround and time overhead
-    int processTurnaround = totalTime - processes[process].arrival;
-
-    // Update turnaround
-    *turnaround += processTurnaround;
-
-    // Current process' overhead
-    double processOverhead = processTurnaround / (double)processes[process].time;
-
-    // Track max overhead and update total overhead
-    if (processOverhead > *maxOverhead) {
-        *maxOverhead = processOverhead;
-    }
-    *totalOverhead += processOverhead;
-}
-
-void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount) {
-    printf("Turnaround time %d\n", (int)ceil(turnaround / (double)processCount));
-    printf("Time overhead %.2f %.2f\n", round(maxOverhead * 100) / 100, round(totalOverhead / processCount * 100) / 100);
 }
