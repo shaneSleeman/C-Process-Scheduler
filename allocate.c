@@ -124,9 +124,9 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
         // Print when processes are ready
         int previousRunning = -1;
-        
+        for (int i = 0; i < processCount; i++) {
+        {
         if(sjf) {
-            for (int i = 0; i < processCount; i++) {
             int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
             // If none available to execute
@@ -192,10 +192,9 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
             
             // Designate that the process is complete, for memory reassignment
             modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
-            }
+            
         }
         else {
-            for (int i = 0; i < processCount; i++) {
 
                 // Avoid incorrect run order
                 int printedReady = 0;
@@ -295,8 +294,8 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                         if(memoryChoice) break;
                     }
                 }
-            }
         }
+        }}
     }
 
     printPerformance(turnaround, maxOverhead, totalOverhead, processCount);
