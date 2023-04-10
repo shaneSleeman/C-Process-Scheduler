@@ -126,6 +126,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         int previousRunning = -1;
         
         if(sjf) {
+            for (int i = 0; i < processCount; i++) {
             int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
             // If none available to execute
@@ -191,6 +192,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
             
             // Designate that the process is complete, for memory reassignment
             modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
+            }
         }
         else {
             for (int i = 0; i < processCount; i++) {
@@ -217,8 +219,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                         }
                     }
                 }
-
-                //if(printedReady) break;
 
                 // For best-fit, only start process if it's started
                 int startedCheck = 1;
