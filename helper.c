@@ -107,13 +107,12 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
         for(int i = 0; i < processCount; i++) {
             if(totalTime - quantum >= lowestMultiple(
                         processes[i].arrival, quantum) &&
-                        processes[i].started == 0) {
+                        processes[i].memoryStart != -1) {
                 processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
                 modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
                 printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                         lowestMultiple(processes[i].arrival, quantum),
                         processes[i].name, processes[i].memoryStart);
-                processes[i].started = 1;
             }
          }
     }
@@ -126,7 +125,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
             }
 
             if(totalTime >= lowestMultiple(
-                        processes[i].arrival, quantum) && processes[i].started == 0 && rrCheck) {
+                        processes[i].arrival, quantum) && processes[i].memoryStart != -1 && rrCheck) {
                 if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
                     processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
                     modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
@@ -135,7 +134,6 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
                             lowestMultiple(totalTime, quantum),
                             processes[i].name, processes[i].memoryStart);
-                    processes[i].started = 1;
 
                     // Necessary to do this instead of ++ to clear unused warning
                     printedReady = printedReady + 1;
