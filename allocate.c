@@ -18,6 +18,7 @@
 // "thread safeness"
 // delegate ready prints
 // input file errors
+// redundant variables i.e. memorystart
 
 void scheduler(Process processes[], int processCount, 
         int memoryChoice, int quantum, int sjf);
@@ -79,10 +80,10 @@ int main(int argc, char **argv) {
     fclose(processesFile);
 
     if(schedule == 0) {
-        scheduler(processes, processesCount, memoryChoice, quantum, 1);
+        scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
     }
     else if(schedule == 1) {
-        scheduler(processes, processesCount, memoryChoice, quantum, 0);
+        scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
     }
 
     return 0;
@@ -143,20 +144,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
                 // Print when processes are ready
                 if(memoryChoice) {
-                    /*
-                    for(int i = 0; i < processCount; i++) {
-                        if(totalTime >= lowestMultiple(
-                                    processes[i].arrival, quantum) &&
-                                    processes[i].started == 0) {
-                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
-
-                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
-                                    lowestMultiple(processes[i].arrival, quantum),
-                                    processes[i].name, processes[i].memoryStart);
-                            processes[i].started = 1;
-                        }
-                    }*/
                     readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
                 }
 
@@ -205,25 +192,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
             }
             else {
                     if(memoryChoice) {
-                        /*
-                        for(int i = 0; i < processCount; i++) {
-                            if(totalTime >= lowestMultiple(
-                                        processes[i].arrival, quantum) &&
-                                        processes[i].started == 0) {
-                                if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
-                                    processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
-                                    modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
-                                    readyTime = totalTime;
-
-                                    printf("%d,READY,process_name=%s,assigned_at=%d\n", 
-                                            lowestMultiple(totalTime, quantum),
-                                            processes[i].name, processes[i].memoryStart);
-                                    processes[i].started = 1;
-                                    printedReady++;
-                                }
-                            }
-                        }
-                        */
                        readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
                     }
 
@@ -318,8 +286,9 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                         lowestMultiple(totalTime, quantum),
                         processes[i].name, processes[i].memoryStart);
                 processes[i].started = 1;
-                *printedReady++;
 
+                // Necessary to do this instead of ++ to clear warning
+                printedReady = printedReady + 1;
             }
         }
     }
