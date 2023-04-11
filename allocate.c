@@ -139,7 +139,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
                 // Print when processes are ready
                 if(memoryChoice) {
-                    /*
+                    
                     for(int i = 0; i < processCount; i++) {
                         if(totalTime >= lowestMultiple(
                                     processes[i].arrival, quantum) &&
@@ -152,8 +152,8 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                                     processes[i].name, processes[i].memoryStart);
                             processes[i].started = 1;
                         }
-                    }*/
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0);
+                    }
+                    //readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0);
                 }
 
                 printf("%d,RUNNING,process_name=%s,remaining_time=%d\n", 
@@ -176,7 +176,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                                     &maxOverhead, &totalOverhead);
 
                 if(memoryChoice) {
-                    /*
+                    
                     for(int i = 0; i < processCount; i++) {
                         if(totalTime - quantum >= lowestMultiple(
                                     processes[i].arrival, quantum) &&
@@ -188,8 +188,8 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                                     processes[i].name, processes[i].memoryStart);
                             processes[i].started = 1;
                         }
-                    }*/
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1);
+                    }
+                    //readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1);
                 }
                 
                 printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
