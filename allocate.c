@@ -271,7 +271,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
             rrCheck = (nextFree(memory, processes, processCount, processes[i].memory) != -1);
         }
 
-        int check = offset ? totalTime - quantum : totalTime;
+        int check = offset ? totalTime : totalTime - quantum;
 
         if(check >= lowestMultiple(
                     processes[i].arrival, quantum) &&
