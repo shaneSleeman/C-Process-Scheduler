@@ -139,6 +139,20 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
                 // Print when processes are ready
                 if(memoryChoice) {
+                    /*
+                    for(int i = 0; i < processCount; i++) {
+                        if(totalTime >= lowestMultiple(
+                                    processes[i].arrival, quantum) &&
+                                    processes[i].started == 0) {
+                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
+
+                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                    lowestMultiple(processes[i].arrival, quantum),
+                                    processes[i].name, processes[i].memoryStart);
+                            processes[i].started = 1;
+                        }
+                    }*/
                     readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0);
                 }
 
@@ -162,6 +176,19 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                                     &maxOverhead, &totalOverhead);
 
                 if(memoryChoice) {
+                    /*
+                    for(int i = 0; i < processCount; i++) {
+                        if(totalTime - quantum >= lowestMultiple(
+                                    processes[i].arrival, quantum) &&
+                                    processes[i].started == 0) {
+                            processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
+                            printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                                    lowestMultiple(processes[i].arrival, quantum),
+                                    processes[i].name, processes[i].memoryStart);
+                            processes[i].started = 1;
+                        }
+                    }*/
                     readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1);
                 }
                 
