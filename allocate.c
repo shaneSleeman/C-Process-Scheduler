@@ -273,11 +273,9 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
 
         int check = totalTime >= lowestMultiple(
                     processes[i].arrival, quantum);
-        if(offset) check = totalTime - quantum >= lowestMultiple(
-                    processes[i].arrival, quantum);
+        if(offset) check = ((totalTime - quantum) >= lowestMultiple(processes[i].arrival, quantum));
 
-        if(check &&
-                    processes[i].started == 0 && rrCheck) {
+        if(check && processes[i].started == 0 && rrCheck) {
             if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
                 processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
                 modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
