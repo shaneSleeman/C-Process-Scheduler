@@ -109,7 +109,16 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
         if(!sjf) {
             rrCheck = (nextFree(memory, processes, processCount, processes[i].memory) != -1);
         }
-        
+
+        int check = totalTime;
+
+        // new
+        if(offset) {
+            rrCheck = 1;
+            check = totalTime - quantum;
+        }
+        // end new
+        /*
         if(offset) {
             if(totalTime - quantum >= lowestMultiple(
                         processes[i].arrival, quantum) &&
@@ -138,6 +147,23 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                     // Necessary to do this instead of ++ to clear unused warning
                     printedReady = printedReady + 1;
                 }
+            }
+        }
+        */
+       if(check >= lowestMultiple(
+                        processes[i].arrival, quantum) && processes[i].started == 0 && rrCheck) {
+            if(nextFree(memory, processes, processCount, processes[i].memory) != -1) {
+                processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
+                modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
+                *readyTime = totalTime;
+
+                printf("%d,READY,process_name=%s,assigned_at=%d\n", 
+                        lowestMultiple(totalTime, quantum),
+                        processes[i].name, processes[i].memoryStart);
+                processes[i].started = 1;
+
+                // Necessary to do this instead of ++ to clear unused warning
+                printedReady = printedReady + 1;
             }
         }
     }
