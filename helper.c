@@ -101,10 +101,10 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     return -1;
 }
 
-void printReady(Process processes[], int memory[], int processCount, int *printedReady, int totalTime, int quantum, int *readyTime, int i) {
+void printReady(Process processes[], int memory[], int processCount, int *printedReady, int totalTime, int quantum, int *readyTime, int i, int offset) {
     processes[i].memoryStart = nextFree(memory, processes, processCount, processes[i].memory);
     modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
-    *readyTime = totalTime;
+    if(!offset) *readyTime = totalTime;
 
     printf("%d,READY,process_name=%s,assigned_at=%d\n", 
             lowestMultiple(totalTime, quantum),
@@ -112,7 +112,7 @@ void printReady(Process processes[], int memory[], int processCount, int *printe
     processes[i].started = 1;
 
     // Necessary to do this instead of ++ to clear unused warning
-    *printedReady = *printedReady + 1;
+    if(!offset) *printedReady = *printedReady + 1;
 }
 
 void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, int offset, int *readyTime, int *printedReady) {
@@ -136,7 +136,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                         processes[i].name, processes[i].memoryStart);
                 processes[i].started = 1;
                 */
-               printReady(processes, memory, processCount, printedReady, totalTime, quantum, readyTime, i);
+               printReady(processes, memory, processCount, printedReady, totalTime, quantum, readyTime, i, offset);
             }
         }
         else {
@@ -156,7 +156,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                     // Necessary to do this instead of ++ to clear unused warning
                     printedReady = printedReady + 1;
                     */
-                    printReady(processes, memory, processCount, printedReady, totalTime, quantum, readyTime, i);
+                    printReady(processes, memory, processCount, printedReady, totalTime, quantum, readyTime, i, offset);
                 }
             }
         }
