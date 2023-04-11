@@ -180,7 +180,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                             processes[i].started = 1;
                         }
                     }*/
-                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
+                    readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime, &printedReady);
                 }
                 
                 printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n", 
@@ -271,7 +271,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
             rrCheck = (nextFree(memory, processes, processCount, processes[i].memory) != -1);
         }
 
-        int check = offset ? totalTime : totalTime - quantum;
+        int check = offset ? totalTime - quantum : totalTime;
 
         if(check >= lowestMultiple(
                     processes[i].arrival, quantum) &&
