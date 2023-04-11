@@ -68,6 +68,7 @@ int main(int argc, char **argv) {
     int processesCount = 0;
 
     Process p;
+    p.started = 0;
     p.memoryStart = 0;
     while (fscanf(processesFile, "%d %s %d %d", 
             &p.arrival, p.name, &p.time, &p.memory) == 4) {
@@ -182,11 +183,11 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
                     // For best-fit, only start process if it's started
                     int startedCheck = 1;
                     if(memoryChoice == 1) {
-                        startedCheck = processes[i].memoryStart;
+                        startedCheck = processes[i].started == 1;
                     }
 
                     // If appropriate arrival and not executed yet
-                    if (executed[i] == 0 && processes[i].arrival <= totalTime && startedCheck != -1) {
+                    if (executed[i] == 0 && processes[i].arrival <= totalTime && startedCheck) {
                         totalTime += quantum;
 
                         // Fix quantum skip bug
