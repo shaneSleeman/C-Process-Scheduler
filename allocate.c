@@ -29,47 +29,31 @@ int main(int argc, char ** argv) {
   // Retrieve arguments
    for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-f")) {
-        if (i + 1 < argc) {
-            file = argv[++i];
-        } else {
-            return 1;
-        }
+        if (i + 1 < argc) file = argv[++i];
+        else return 1;
     } else if (!strcmp(argv[i], "-s")) {
         if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
             schedule = 1;
             i++;
         } 
-        else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) {
-            i++;
-        }
-        else {
-            return 1;
-        }
+        else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) i++;
+        else return 1;
     } else if (!strcmp(argv[i], "-m")) {
         if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
             memoryChoice = 1;
             i++;
         }
-        else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) {
-            i++;
-        }
-        else {
-            return 1;
-        }
+        else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) i++;
+        else return 1;
     } else if (!strcmp(argv[i], "-q")) {
-        if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) {
-            quantum = atoi(argv[++i]);
-        } else {
-            return 1;
-        }
+        if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) quantum = atoi(argv[++i]);
+        else return 1;
     }
   }
 
   FILE * processesFile = fopen(file, "r");
 
-  if (processesFile == NULL) {
-    return 1;
-  }
+  if (processesFile == NULL) return 1;
 
   Process processes[MAX_PROCESSES];
   int processesCount = 0;
@@ -77,9 +61,7 @@ int main(int argc, char ** argv) {
   Process p;
   p.memoryStart = -1;
   while (fscanf(processesFile, "%d %s %d %d", &
-      p.arrival, p.name, & p.time, & p.memory) == 4) {
-    processes[processesCount++] = p;
-  }
+      p.arrival, p.name, & p.time, & p.memory) == 4) processes[processesCount++] = p;
 
   fclose(processesFile);
 
@@ -114,9 +96,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
   // Memory
   int memory[MEMORY_CAPACITY];
-  for (int i = 0; i < MEMORY_CAPACITY; i++) {
-    memory[i] = -1;
-  }
+  for (int i = 0; i < MEMORY_CAPACITY; i++) memory[i] = -1;
 
   // Aiding bug fix
   int prevProcess = 0;
@@ -131,19 +111,16 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
     for (int i = 0; i < processCount; i++) {
 
-      if(memoryChoice) {
-
-        // Print when processes are ready
-        readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
-      }
+      // Print when processes are ready
+      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
 
       if (sjf) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
         if (shortest == -1) {
-          totalTime++;
-          continue;
+            totalTime++; 
+            continue;
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n",
@@ -154,9 +131,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         // but doesn't seem necessary at the moment
         // Signifying as executed
         int quantums = 0;
-        while (quantums < processes[shortest].time) {
-          quantums += quantum;
-        }
+        while (quantums < processes[shortest].time) quantums += quantum;
         totalTime += quantums;
         executed[shortest] = 1;
 
@@ -179,9 +154,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
       } else {
         // For best-fit, only start process if it's started
         int startedCheck = 1;
-        if (memoryChoice == 1) {
-          startedCheck = processes[i].memoryStart != -1;
-        }
+        if (memoryChoice == 1) startedCheck = processes[i].memoryStart != -1;
 
         // If appropriate arrival and not executed yet
         if (executed[i] == 0 && processes[i].arrival <= totalTime && startedCheck) {
@@ -202,13 +175,10 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
               remainingTime[prevProcess] -= quantum;
             }
             if (memoryChoice) {
-              if (totalTime - quantum < previousRunning) {
-                totalTime = quantum + quantum + previousRunning;
-              }
+              if (totalTime - quantum < previousRunning) totalTime = quantum + quantum + previousRunning;
             }
-            if (prevRemainingTime[i] == remainingTime[i]) {
-              remainingTime[i] -= quantum;
-            }
+            if (prevRemainingTime[i] == remainingTime[i]) remainingTime[i] -= quantum;
+
             printf("%d,RUNNING,process_name=%s,remaining_time=%d\n",
               totalTime - quantum, processes[i].name, remainingTime[i]);
             prevProcess = i;
@@ -229,12 +199,9 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
             printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n",
               totalTime, processes[i].name, remain);
 
-            // Designate that the process is complete, for memory reassignment
-            //modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0);
-
             // End current iteration to avoid incorrect order
             if (memoryChoice) {
-                modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0);
+                modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0); 
                 break;
             }
           }

@@ -47,9 +47,7 @@ void updatePerformance(Process processes[], int totalTime, int process, int *tur
     double processOverhead = processTurnaround / (double)processes[process].time;
 
     // Track max overhead and update total overhead
-    if (processOverhead > *maxOverhead) {
-        *maxOverhead = processOverhead;
-    }
+    if (processOverhead > *maxOverhead) *maxOverhead = processOverhead;
     *totalOverhead += processOverhead;
 }
 
@@ -62,19 +60,14 @@ void printPerformance(int turnaround, double maxOverhead, double totalOverhead, 
  * Or clearing memory
 */
 void modifyMemory(int memory[], int i, int start, int length, int fill) {
-    for(int j = start; j < start + length; j++) {
-        memory[j] = fill ? i : -1;
-    }
+    for(int j = start; j < start + length; j++) memory[j] = fill ? i : -1;
 }
 
 // Simplifies use of quantum time by checking
 // arrival times are multiples of quantum
 int lowestMultiple(int n, int i) {
     int result = (n / i) * i;
-    if (result < n) {
-        result += i;
-    }
-
+    if (result < n) result += i;
     return result;
 }
 
@@ -87,13 +80,9 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     int minGap = INT_MAX;
 
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
-        if(memory[i] != -1) {
-            tally = 0;
-        }
+        if(memory[i] != -1) tally = 0;
         else {
-            if(tally == 0) {
-                currentLocation = i;
-            }
+            if(tally == 0) currentLocation = i;
             tally++;
         }
         
@@ -102,17 +91,15 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
 
             if(gap < minGap) {
                 minGap = gap;
-                if(minGap == 0) { // If gap is perfect
-                    return currentLocation;
-                }
+
+                // If gap is perfect
+                if(minGap == 0) return currentLocation;
             }
         }
     }
 
     // If no perfect fit, return best-fit
-    if(minGap != INT_MAX) {
-        return currentLocation;
-    }
+    if(minGap != INT_MAX) return currentLocation;
 
     // When there's no free location
     return -1;
@@ -134,9 +121,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
 
                 printf("%d,READY,process_name=%s,assigned_at=%d\n", printTime, processes[i].name, processes[i].memoryStart);
 
-                if (!offset) {
-                    *readyTime = totalTime;
-                }
+                if (!offset) *readyTime = totalTime;
             }
         }
     }
@@ -146,13 +131,9 @@ int compareProcess(const void *a, const void *b) {
     const Process *processA = (const Process *)a;
     const Process *processB = (const Process *)b;
 
-    if (processA->arrival != processB->arrival) {
-        return processA->arrival - processB->arrival;
-    }
+    if (processA->arrival != processB->arrival) return processA->arrival - processB->arrival;
 
-    if (processA->time != processB->time) {
-        return processA->time - processB->time;
-    }
+    if (processA->time != processB->time) return processA->time - processB->time;
 
     return strcmp(processA->name, processB->name);
 }
