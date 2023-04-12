@@ -32,7 +32,7 @@ int main(int argc, char ** argv) {
    for (int i = 1; i < argc; i++) {
     if (!strcmp(argv[i], "-f")) {
         if (i + 1 < argc) {
-            *file = argv[++i];
+            file = argv[++i];
         } else {
             return 1;
         }
