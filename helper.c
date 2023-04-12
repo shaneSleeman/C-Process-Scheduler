@@ -136,7 +136,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
 
                 if (!offset) {
                     *readyTime = totalTime;
-                    *printedReady = *printedReady + 1;
+                    //*printedReady = *printedReady + 1;
                 }
             }
         }
