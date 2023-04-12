@@ -34,7 +34,6 @@ int shortestProcess(Process processes[], int processCount, int totalTime, int ex
     return shortest;
 }
 
-
 void updatePerformance(Process processes[], int totalTime, int process, int *turnaround, 
         double *maxOverhead, double *totalOverhead) {
     
@@ -64,10 +63,7 @@ void printPerformance(int turnaround, double maxOverhead, double totalOverhead, 
 */
 void modifyMemory(int memory[], int i, int start, int length, int fill) {
     for(int j = start; j < start + length; j++) {
-        if(fill) memory[j] = i;
-        else {
-            memory[j] = -1;
-        }
+        memory[j] = fill ? i : -1;
     }
 }
 
@@ -137,11 +133,10 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                 int printTime = offset ? arrivalQuantum : lowestMultiple(totalTime, quantum);
 
                 printf("%d,READY,process_name=%s,assigned_at=%d\n", printTime, processes[i].name, processes[i].memoryStart);
-                //processes[i].started = 1;
 
                 if (!offset) {
                     *readyTime = totalTime;
-                    printedReady = printedReady + 1;
+                    *printedReady = *printedReady + 1;
                 }
             }
         }

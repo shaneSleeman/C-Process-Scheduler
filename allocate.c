@@ -12,8 +12,8 @@
 // clean notation and var names indentations
 // attempt task 4
 // line widths
-// redundant variables i.e. started
 // reduce excess commits
+// memory leaks?
 
 void scheduler(Process processes[], int processCount,
   int memoryChoice, int quantum, int sjf);
@@ -75,7 +75,6 @@ int main(int argc, char ** argv) {
   int processesCount = 0;
 
   Process p;
-  //p.started = 0;
   p.memoryStart = -1;
   while (fscanf(processesFile, "%d %s %d %d", &
       p.arrival, p.name, & p.time, & p.memory) == 4) {
@@ -86,11 +85,7 @@ int main(int argc, char ** argv) {
 
   qsort(processes, processesCount, sizeof(Process), compareProcess);
 
-  if (schedule == 0) {
-    scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
-  } else if (schedule == 1) {
-    scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
-  }
+  scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
 
   return 0;
 }
@@ -150,7 +145,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
         // Print when processes are ready
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, & readyTime, & printedReady);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n",
@@ -169,11 +164,11 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
         remain--;
 
-        updatePerformance(processes, totalTime, shortest, & turnaround, &
+        updatePerformance(processes, totalTime, shortest, &turnaround, &
           maxOverhead, & totalOverhead);
 
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, & readyTime, & printedReady);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime, &printedReady);
           modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
@@ -185,13 +180,12 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
       } else {
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, & readyTime, & printedReady);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
         }
 
         // For best-fit, only start process if it's started
         int startedCheck = 1;
         if (memoryChoice == 1) {
-          //startedCheck = processes[i].started == 1;
           startedCheck = processes[i].memoryStart != -1;
         }
 
