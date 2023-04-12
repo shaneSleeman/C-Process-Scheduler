@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <setjmp.h>
 
 // Defined helper functions
 #include "helper.h"
@@ -21,50 +20,6 @@
 void scheduler(Process processes[], int processCount,
   int memoryChoice, int quantum, int sjf);
 
-void catch_error(jmp_buf buf) {
-    longjmp(buf, 1);
-}
-
-void parseArguments(int argc, char **argv, char **file, int *schedule, int *memoryChoice, int *quantum, jmp_buf buf) {
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-f")) {
-            if (i + 1 < argc) {
-                *file = argv[++i];
-            } else {
-                catch_error(buf);
-            }
-        } else if (!strcmp(argv[i], "-s")) {
-            if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-                *schedule = 1;
-                i++;
-            } 
-            else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) {
-                i++;
-            }
-            else {
-                catch_error(buf);
-            }
-        } else if (!strcmp(argv[i], "-m")) {
-            if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-                *memoryChoice = 1;
-                i++;
-            }
-            else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) {
-                i++;
-            }
-            else {
-                catch_error(buf);
-            }
-        } else if (!strcmp(argv[i], "-q")) {
-            if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) {
-                *quantum = atoi(argv[++i]);
-            } else {
-                catch_error(buf);
-            }
-        }
-    }
-}
-
 int main(int argc, char ** argv) {
 
   // Storing arguments
@@ -74,12 +29,42 @@ int main(int argc, char ** argv) {
   int quantum = 0;
 
   // Retrieve arguments
-  // Try-catch any errors for command line input
-  static jmp_buf buf;
-  if (setjmp(buf)) {
-    return 1;
-  } else {
-    parseArguments(argc, argv, &file, &schedule, &memoryChoice, &quantum, buf);
+   for (int i = 1; i < argc; i++) {
+    if (!strcmp(argv[i], "-f")) {
+        if (i + 1 < argc) {
+            *file = argv[++i];
+        } else {
+            return 1;
+        }
+    } else if (!strcmp(argv[i], "-s")) {
+        if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
+            schedule = 1;
+            i++;
+        } 
+        else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) {
+            i++;
+        }
+        else {
+            return 1;
+        }
+    } else if (!strcmp(argv[i], "-m")) {
+        if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
+            memoryChoice = 1;
+            i++;
+        }
+        else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) {
+            i++;
+        }
+        else {
+            return 1;
+        }
+    } else if (!strcmp(argv[i], "-q")) {
+        if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) {
+            quantum = atoi(argv[++i]);
+        } else {
+            return 1;
+        }
+    }
   }
 
   FILE * processesFile = fopen(file, "r");
