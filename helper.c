@@ -3,9 +3,6 @@
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
-#include <setjmp.h>
-#include <stdlib.h>
-#include <string.h>
 
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
     int n = 0;
@@ -125,50 +122,6 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                     *readyTime = totalTime;
                     printedReady = printedReady + 1;
                 }
-            }
-        }
-    }
-}
-
-void catch_error(jmp_buf buf) {
-    longjmp(buf, 1);
-}
-
-void parseArguments(int argc, char **argv, char **file, int *schedule, int *memoryChoice, int *quantum, jmp_buf buf) {
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-f")) {
-            if (i + 1 < argc) {
-                *file = argv[++i];
-            } else {
-                catch_error(buf);
-            }
-        } else if (!strcmp(argv[i], "-s")) {
-            if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-                *schedule = 1;
-                i++;
-            } 
-            else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) {
-                i++;
-            }
-            else {
-                catch_error(buf);
-            }
-        } else if (!strcmp(argv[i], "-m")) {
-            if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-                *memoryChoice = 1;
-                i++;
-            }
-            else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) {
-                i++;
-            }
-            else {
-                catch_error(buf);
-            }
-        } else if (!strcmp(argv[i], "-q")) {
-            if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) {
-                *quantum = atoi(argv[++i]);
-            } else {
-                catch_error(buf);
             }
         }
     }
