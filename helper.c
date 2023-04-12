@@ -128,7 +128,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
         int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1);
         int arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
-        if (processes[i].memoryStart == 0 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
+        if (processes[i].memoryStart == -1 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
             int freeMemoryIndex = nextFree(memory, processes, processCount, processes[i].memory);
 
             if (freeMemoryIndex != -1) {

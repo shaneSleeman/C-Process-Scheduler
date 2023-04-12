@@ -8,6 +8,7 @@
 
 // Todo:
 // split functions, make sure other marks
+// include redundancies and comments
 // clean notation and var names indentations
 // attempt task 4
 // line widths
@@ -75,7 +76,7 @@ int main(int argc, char ** argv) {
 
   Process p;
   //p.started = 0;
-  p.memoryStart = 0;
+  p.memoryStart = -1;
   while (fscanf(processesFile, "%d %s %d %d", &
       p.arrival, p.name, & p.time, & p.memory) == 4) {
     processes[processesCount++] = p;
@@ -173,13 +174,14 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
         if (memoryChoice) {
           readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, & readyTime, & printedReady);
+          modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n",
           totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
 
         // Designate that the process is complete, for memory reassignment
-        modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
+        //modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
 
       } else {
         if (memoryChoice) {
@@ -190,7 +192,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         int startedCheck = 1;
         if (memoryChoice == 1) {
           //startedCheck = processes[i].started == 1;
-          startedCheck = processes[i].memoryStart != 0;
+          startedCheck = processes[i].memoryStart != -1;
         }
 
         // If appropriate arrival and not executed yet
