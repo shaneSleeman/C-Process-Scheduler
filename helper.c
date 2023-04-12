@@ -84,7 +84,6 @@ int lowestMultiple(int n, int i) {
 
 // Next free memory location for a given memory size
 // Returns -1 if memory is full i.e. has no free spot
-// Imperfect implementation, must fix for bestfit
 int nextFree(int memory[], Process processes[], int processCount, int length) {
     int currentLocation = -1;
     int tally = 0;
@@ -106,7 +105,9 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
 
             if(gap < minGap) {
                 minGap = gap;
-                if(minGap == 0) { // If gap is perfect
+
+                // If gap is perfect
+                if(minGap == 0) {
                     return currentLocation;
                 }
             }
