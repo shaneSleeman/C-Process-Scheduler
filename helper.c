@@ -3,6 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <limits.h>
+#include <string.h>
 
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
     int n = 0;
@@ -125,4 +126,19 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
             }
         }
     }
+}
+
+int compareProcess(const void *a, const void *b) {
+    const Process *processA = (const Process *)a;
+    const Process *processB = (const Process *)b;
+
+    if (processA->arrival != processB->arrival) {
+        return processA->arrival - processB->arrival;
+    }
+
+    if (processA->time != processB->time) {
+        return processA->time - processB->time;
+    }
+
+    return strcmp(processA->name, processB->name);
 }
