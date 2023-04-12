@@ -18,7 +18,7 @@
 void scheduler(Process processes[], int processCount,
   int memoryChoice, int quantum, int sjf);
 
-int main(int argc, char ** argv) {
+int main(int argc, char **argv) {
 
   // Storing arguments
   char * file = NULL;
@@ -74,40 +74,26 @@ int main(int argc, char ** argv) {
 
 void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, int sjf) {
 
-  int totalTime = 0;
-  int lastExecuted = -1; // Last process, avoid reprint
+  int totalTime = 0, lastExecuted = -1, turnaround = 0, prevProcess = 0, memory[MEMORY_CAPACITY], remain = processCount; // Last process, avoid reprint
+
+  // Memory
+  for (int i = 0; i < MEMORY_CAPACITY; i++) memory[i] = -1;
 
   // Executed processes array and their remaining times
-  int executed[processCount];
-  int remainingTime[processCount];
-  int prevRemainingTime[processCount];
+  int executed[processCount], remainingTime[processCount], prevRemainingTime[processCount];
   for (int i = 0; i < processCount; i++) {
     executed[i] = 0;
     remainingTime[i] = processes[i].time;
     prevRemainingTime[i] = -1;
   }
 
-  int remain = processCount;
-
   // Hold performance stats
-  int turnaround = 0;
-  double maxOverhead = 0.0;
-  double totalOverhead = 0.0;
-
-  // Memory
-  int memory[MEMORY_CAPACITY];
-  for (int i = 0; i < MEMORY_CAPACITY; i++) memory[i] = -1;
-
-  // Aiding bug fix
-  int prevProcess = 0;
+  double maxOverhead = 0.0, totalOverhead = 0.0;
 
   while (remain > 0) {
 
     // Avoids accidental quantum skips
-    int readyTime = -1;
-
-    // Print when processes are ready
-    int previousRunning = -1;
+    int readyTime = -1, previousRunning = -1;
 
     for (int i = 0; i < processCount; i++) {
 
@@ -147,10 +133,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n",
           totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
-
-        // Designate that the process is complete, for memory reassignment
-        //modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
-
       } else {
         // For best-fit, only start process if it's started
         int startedCheck = 1;

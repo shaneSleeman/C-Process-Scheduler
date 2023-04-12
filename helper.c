@@ -6,8 +6,7 @@
 #include <string.h>
 
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
-    int n = 0;
-    int atLeast = totalTime - quantum;
+    int n = 0, atLeast = totalTime - quantum;
     for(int i = 1; i < processCount; i++) {
         if(processes[i].arrival < atLeast &&
                 executed[i] != 1) n++;
@@ -17,8 +16,7 @@ int lowerTime(int totalTime, int executed[], Process processes[], int processCou
 
 // Finds the shortest remaining process
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]) {
-    int shortest = -1;
-    int minimum = INT_MAX;
+    int shortest = -1, minimum = INT_MAX;
 
     // Find the index of the shortest non-executed process
     // Always begins with the first process
@@ -75,9 +73,7 @@ int lowestMultiple(int n, int i) {
 // Returns -1 if memory is full i.e. has no free spot
 // Imperfect implementation, must fix for bestfit
 int nextFree(int memory[], Process processes[], int processCount, int length) {
-    int currentLocation = -1;
-    int tally = 0;
-    int minGap = INT_MAX;
+    int currentLocation = -1, tally = 0, minGap = INT_MAX;
 
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
         if(memory[i] != -1) tally = 0;
@@ -108,8 +104,8 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
 void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, int offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
-        int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1);
-        int arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
+        int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1),
+          arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
         if (processes[i].memoryStart == -1 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
             int freeMemoryIndex = nextFree(memory, processes, processCount, processes[i].memory);
@@ -128,8 +124,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
 }
 
 int compareProcess(const void *a, const void *b) {
-    const Process *processA = (const Process *)a;
-    const Process *processB = (const Process *)b;
+    const Process *processA = (const Process *)a, *processB = (const Process *)b;
 
     if (processA->arrival != processB->arrival) return processA->arrival - processB->arrival;
 
