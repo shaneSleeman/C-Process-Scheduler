@@ -131,6 +131,12 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
     for (int i = 0; i < processCount; i++) {
 
+      if(memoryChoice) {
+
+        // Print when processes are ready
+        readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
+      }
+
       if (sjf) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
@@ -138,11 +144,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         if (shortest == -1) {
           totalTime++;
           continue;
-        }
-
-        // Print when processes are ready
-        if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n",
@@ -176,10 +177,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         //modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
 
       } else {
-        if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
-        }
-
         // For best-fit, only start process if it's started
         int startedCheck = 1;
         if (memoryChoice == 1) {
