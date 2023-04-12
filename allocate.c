@@ -242,10 +242,13 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
               totalTime, processes[i].name, remain);
 
             // Designate that the process is complete, for memory reassignment
-            modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0);
+            //modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0);
 
             // End current iteration to avoid incorrect order
-            if (memoryChoice) break;
+            if (memoryChoice) {
+                modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 0);
+                break;
+            }
           }
         }
       }
