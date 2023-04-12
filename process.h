@@ -8,7 +8,6 @@ typedef struct {
     char name[PROCESS_NAME_LENGTH];
     int time;
     int memory;
-    int started;
     int memoryStart;
 } Process;
 
