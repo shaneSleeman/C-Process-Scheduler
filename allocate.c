@@ -8,18 +8,14 @@
 
 // Todo:
 // split functions, make sure other marks
-// clean files pushed
 // more tests
 // clean notation and var names indentations
 // attempt task 4
 // line widths
 // handle errors
-// 2^32-1 max processes
-// "thread safeness"
-// delegate ready prints
 // input file errors
 // redundant variables i.e. memorystart, var names
-// reduce excess commits?
+// reduce excess commits
 
 void scheduler(Process processes[], int processCount,
   int memoryChoice, int quantum, int sjf);
@@ -32,33 +28,18 @@ int main(int argc, char ** argv) {
   int memoryChoice = 0;
   int quantum = 0;
 
-  // Retrieve and store arguments
-  for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "-f")) {
-      if (i + 1 < argc) {
-        file = argv[++i];
-      }
-    } else if (!strcmp(argv[i], "-s")) {
-      if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-        schedule = 1;
-        i++;
-      }
-    } else if (!strcmp(argv[i], "-m")) {
-      if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-        memoryChoice = 1;
-        i++;
-      }
-    } else if (!strcmp(argv[i], "-q")) {
-      if (i + 1 < argc) {
-        quantum = atoi(argv[++i]);
-      }
-    }
+  // Retrieve arguments
+  // Try-catch any errors for command line input
+  static jmp_buf buf;
+  if (setjmp(buf)) {
+    return 1;
+  } else {
+    parseArguments(argc, argv, &file, &schedule, &memoryChoice, &quantum, buf);
   }
 
   FILE * processesFile = fopen(file, "r");
 
   if (processesFile == NULL) {
-    printf("Failed to open file.");
     return 1;
   }
 
