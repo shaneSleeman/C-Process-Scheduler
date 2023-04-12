@@ -129,9 +129,6 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
     // Print when processes are ready
     int previousRunning = -1;
 
-    // Avoid incorrect run order
-    int printedReady = 0;
-
     for (int i = 0; i < processCount; i++) {
 
       if (sjf) {
@@ -145,7 +142,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
         // Print when processes are ready
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
         }
 
         printf("%d,RUNNING,process_name=%s,remaining_time=%d\n",
@@ -168,7 +165,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
           maxOverhead, & totalOverhead);
 
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime, &printedReady);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime);
           modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
@@ -180,7 +177,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
 
       } else {
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime, &printedReady);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
         }
 
         // For best-fit, only start process if it's started
