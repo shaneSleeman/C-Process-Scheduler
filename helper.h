@@ -2,6 +2,8 @@
 #define HELPER_H
 #include "process.h"
 
+#include <stdint.h>
+
 #define MEMORY_CAPACITY 2048
 #define MAX_PROCESSES INT16_MAX // Largest int that doesn't cause error
 
