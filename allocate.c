@@ -17,6 +17,21 @@
 // redundant variables i.e. memorystart, var names
 // reduce excess commits
 
+int compareProcesses(const void *a, const void *b) {
+    const Process *processA = (const Process *)a;
+    const Process *processB = (const Process *)b;
+
+    if (processA->arrival != processB->arrival) {
+        return processA->arrival - processB->arrival;
+    }
+
+    if (processA->time != processB->time) {
+        return processA->time - processB->time;
+    }
+
+    return strcmp(processA->name, processB->name);
+}
+
 void scheduler(Process processes[], int processCount,
   int memoryChoice, int quantum, int sjf);
 
@@ -85,6 +100,8 @@ int main(int argc, char ** argv) {
   }
 
   fclose(processesFile);
+
+  qsort(processes, processesCount, sizeof(Process), compareProcesses);
 
   if (schedule == 0) {
     scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
