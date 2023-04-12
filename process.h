@@ -8,7 +8,7 @@ typedef struct {
     char name[PROCESS_NAME_LENGTH];
     int time;
     int memory;
-    int started; // Not redundant, as a process can start but not be allocated memory
+    //int started; // Not redundant, as a process can start but not be allocated memory
     int memoryStart;
 } Process;
 

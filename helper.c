@@ -128,7 +128,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
         int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1);
         int arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
-        if (processes[i].started == 0 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
+        if (processes[i].memoryStart == 0 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
             int freeMemoryIndex = nextFree(memory, processes, processCount, processes[i].memory);
 
             if (freeMemoryIndex != -1) {
@@ -137,7 +137,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                 int printTime = offset ? arrivalQuantum : lowestMultiple(totalTime, quantum);
 
                 printf("%d,READY,process_name=%s,assigned_at=%d\n", printTime, processes[i].name, processes[i].memoryStart);
-                processes[i].started = 1;
+                //processes[i].started = 1;
 
                 if (!offset) {
                     *readyTime = totalTime;
