@@ -2,6 +2,7 @@
 #define HELPER_H
 #include "process.h"
 
+#define MAX_PROCESSES 4294967295 // 2^32 - 1, max with 32bit
 #define MEMORY_CAPACITY 2048
 
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);

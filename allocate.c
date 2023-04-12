@@ -18,7 +18,8 @@
 // "thread safeness"
 // delegate ready prints
 // input file errors
-// redundant variables i.e. memorystart
+// redundant variables i.e. memorystart, var names
+// reduce excess commits?
 
 void scheduler(Process processes[], int processCount,
   int memoryChoice, int quantum, int sjf);
@@ -61,7 +62,7 @@ int main(int argc, char ** argv) {
     return 1;
   }
 
-  Process processes[10000]; // Figure out const or max
+  Process processes[MAX_PROCESSES];
   int processesCount = 0;
 
   Process p;
