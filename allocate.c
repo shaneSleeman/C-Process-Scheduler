@@ -2,17 +2,16 @@
 #include <string.h>
 #include <stdlib.h>
 
-// Defined helper functions
+// Defined helper function
 #include "helper.h"
 #include "process.h"
 
 // Todo:
 // split functions, make sure other marks
-// more tests
 // clean notation and var names indentations
 // attempt task 4
 // line widths
-// redundant variables i.e. memorystart, var names
+// redundant variables i.e. started
 // reduce excess commits
 
 void scheduler(Process processes[], int processCount,
@@ -75,7 +74,8 @@ int main(int argc, char ** argv) {
   int processesCount = 0;
 
   Process p;
-  p.memoryStart = -1;
+  p.started = 0;
+  p.memoryStart = 0;
   while (fscanf(processesFile, "%d %s %d %d", &
       p.arrival, p.name, & p.time, & p.memory) == 4) {
     processes[processesCount++] = p;
@@ -189,7 +189,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         // For best-fit, only start process if it's started
         int startedCheck = 1;
         if (memoryChoice == 1) {
-          startedCheck = processes[i].memoryStart != -1;
+          startedCheck = processes[i].started == 1;
         }
 
         // If appropriate arrival and not executed yet

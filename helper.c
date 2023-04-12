@@ -59,7 +59,9 @@ void printPerformance(int turnaround, double maxOverhead, double totalOverhead, 
     printf("Time overhead %.2f %.2f\n", round(maxOverhead * 100) / 100, round(totalOverhead / processCount * 100) / 100);
 }
 
-// Assigning and clearing memory functions
+/* Assign memory start+length to i, the index of a process
+ * Or clearing memory
+*/
 void modifyMemory(int memory[], int i, int start, int length, int fill) {
     for(int j = start; j < start + length; j++) {
         if(fill) memory[j] = i;
@@ -81,10 +83,13 @@ int lowestMultiple(int n, int i) {
 }
 
 // Next free memory location for a given memory size
+// Returns -1 if memory is full i.e. has no free spot
 // Imperfect implementation, must fix for bestfit
 int nextFree(int memory[], Process processes[], int processCount, int length) {
-    int currentLocation = 0;
+    int currentLocation = -1;
     int tally = 0;
+    int minGap = INT_MAX;
+
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
         if(memory[i] != -1) {
             tally = 0;
@@ -95,10 +100,25 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
             }
             tally++;
         }
-        if(tally == length) return currentLocation;
+        
+        if(tally >= length) {
+            int gap = tally - length;
+
+            if(gap < minGap) {
+                minGap = gap;
+                if(minGap == 0) { // If gap is perfect
+                    return currentLocation;
+                }
+            }
+        }
     }
 
-    // Flag for when there's no free memory, 0 if break
+    // If no perfect fit, return best-fit
+    if(minGap != INT_MAX) {
+        return currentLocation;
+    }
+
+    // When there's no free location
     return -1;
 }
 
@@ -108,7 +128,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
         int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1);
         int arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
-        if (processes[i].memoryStart == -1 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
+        if (processes[i].started == 0 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
             int freeMemoryIndex = nextFree(memory, processes, processCount, processes[i].memory);
 
             if (freeMemoryIndex != -1) {
@@ -117,7 +137,7 @@ void readyProcess(int processCount, int totalTime, int quantum, int memory[], Pr
                 int printTime = offset ? arrivalQuantum : lowestMultiple(totalTime, quantum);
 
                 printf("%d,READY,process_name=%s,assigned_at=%d\n", printTime, processes[i].name, processes[i].memoryStart);
-                //processes[i].started = 1;
+                processes[i].started = 1;
 
                 if (!offset) {
                     *readyTime = totalTime;
