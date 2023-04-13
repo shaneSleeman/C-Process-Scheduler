@@ -16,15 +16,13 @@
 // memory leaks?
 
 void scheduler(Process processes[], int processCount,
-  int memoryChoice, int quantum, int sjf);
+  int scheduleChoice, int memoryChoice, int quantum);
 
 int main(int argc, char **argv) {
 
   // Storing arguments
   char * file = NULL;
-  int schedule = 0;
-  int memoryChoice = 0;
-  int quantum = 0;
+  int scheduleChoice = 0, memoryChoice = 0, quantum = 0, processesCount = 0;
 
   // Retrieve arguments
    for (int i = 1; i < argc; i++) {
@@ -33,7 +31,7 @@ int main(int argc, char **argv) {
         else return 1;
     } else if (!strcmp(argv[i], "-s")) {
         if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-            schedule = 1;
+            scheduleChoice = 0;
             i++;
         } 
         else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) i++;
@@ -55,10 +53,8 @@ int main(int argc, char **argv) {
 
   if (processesFile == NULL) return 1;
 
-  Process processes[MAX_PROCESSES];
-  int processesCount = 0;
+  Process processes[MAX_PROCESSES], p;
 
-  Process p;
   p.memoryStart = -1;
   while (fscanf(processesFile, "%d %s %d %d", &
       p.arrival, p.name, & p.time, & p.memory) == 4) processes[processesCount++] = p;
@@ -67,12 +63,12 @@ int main(int argc, char **argv) {
 
   qsort(processes, processesCount, sizeof(Process), compareProcess);
 
-  scheduler(processes, processesCount, memoryChoice, quantum, !schedule);
+  scheduler(processes, processesCount, scheduleChoice, memoryChoice, quantum);
 
   return 0;
 }
 
-void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, int sjf) {
+void scheduler(Process processes[], int processCount, int scheduleChoice, int memoryChoice, int quantum) {
 
   int totalTime = 0, lastExecuted = -1, turnaround = 0, prevProcess = 0, memory[MEMORY_CAPACITY], remain = processCount; // Last process, avoid reprint
 
@@ -98,9 +94,9 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
     for (int i = 0; i < processCount; i++) {
 
       // Print when processes are ready
-      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
+      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, scheduleChoice, 0, &readyTime);
 
-      if (sjf) {
+      if (!scheduleChoice) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
@@ -127,7 +123,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
           maxOverhead, & totalOverhead);
 
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime);
+          readyProcess(processCount, totalTime, quantum, memory, processes, scheduleChoice, 1, &readyTime);
           modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
