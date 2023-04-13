@@ -3,9 +3,17 @@
 #include "process.h"
 
 #include <stdint.h>
+#include <stdlib.h>
 
 #define MEMORY_CAPACITY 2048
 #define MAX_PROCESSES INT16_MAX // Largest int that doesn't cause error
+
+typedef struct {
+    char *file;
+    int schedule;
+    int memoryChoice;
+    int quantum;
+} Arguments;
 
 int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
@@ -16,5 +24,6 @@ int lowestMultiple(int n, int i);
 int nextFree(int memory[], Process processes[], int processCount, int length);
 void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, int offset, int *readyTime);
 int compareProcess(const void *a, const void *b);
+int parseArguments(int argc, char **argv, Arguments *args);
 
 #endif /* HELPER_H */

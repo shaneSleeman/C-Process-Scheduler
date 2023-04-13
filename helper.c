@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
+#include <stdlib.h>
 
 int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
     int n = 0, atLeast = totalTime - quantum;
@@ -101,10 +102,10 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     return -1;
 }
 
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int scheduleChoice, int offset, int *readyTime) {
+void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, int offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
-        int rrCheck = scheduleChoice ? 0 : (nextFree(memory, processes, processCount, processes[i].memory) != -1),
+        int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1),
           arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
         if (processes[i].memoryStart == -1 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
@@ -131,4 +132,47 @@ int compareProcess(const void *a, const void *b) {
     if (processA->time != processB->time) return processA->time - processB->time;
 
     return strcmp(processA->name, processB->name);
+}
+
+int parseArguments(int argc, char **argv, Arguments *args) {
+    args->file = NULL;
+    args->schedule = 0;
+    args->memoryChoice = 0;
+    args->quantum = 0;
+
+    for (int i = 1; i < argc; i++) {
+        if (!strcmp(argv[i], "-f")) {
+            if (i + 1 < argc) {
+                args->file = argv[++i];
+            } else {
+                return 0;
+            }
+        } else if (!strcmp(argv[i], "-s")) {
+            if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
+                args->schedule = 1;
+                i++;
+            } else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) {
+                i++;
+            } else {
+                return 0;
+            }
+        } else if (!strcmp(argv[i], "-m")) {
+            if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
+                args->memoryChoice = 1;
+                i++;
+            } else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) {
+                i++;
+            } else {
+                return 0;
+            }
+        } else if (!strcmp(argv[i], "-q")) {
+            if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) {
+                args->quantum = atoi(argv[++i]);
+            } else {
+                return 0;
+            }
+        }
+    }
+
+    return args->file != NULL;
 }

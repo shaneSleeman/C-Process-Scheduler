@@ -1,60 +1,29 @@
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
 
 // Defined helper function
 #include "helper.h"
 #include "process.h"
 
-// Todo:
-// split functions, make sure other marks
-// include redundancies and comments
-// clean notation and var names indentations
-// attempt task 4
-// line widths
-// reduce excess commits
-// memory leaks?
-
 void scheduler(Process processes[], int processCount,
-  int scheduleChoice, int memoryChoice, int quantum);
+  int memoryChoice, int quantum, int sjf);
 
 int main(int argc, char **argv) {
 
-  // Storing arguments
-  char * file = NULL;
-  int scheduleChoice = 0, memoryChoice = 0, quantum = 0, processesCount = 0;
+  Arguments args;
 
-  // Retrieve arguments
-   for (int i = 1; i < argc; i++) {
-    if (!strcmp(argv[i], "-f")) {
-        if (i + 1 < argc) file = argv[++i];
-        else return 1;
-    } else if (!strcmp(argv[i], "-s")) {
-        if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-            scheduleChoice = 0;
-            i++;
-        } 
-        else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) i++;
-        else return 1;
-    } else if (!strcmp(argv[i], "-m")) {
-        if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-            memoryChoice = 1;
-            i++;
-        }
-        else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) i++;
-        else return 1;
-    } else if (!strcmp(argv[i], "-q")) {
-        if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) quantum = atoi(argv[++i]);
-        else return 1;
-    }
+  if (!parseArguments(argc, argv, &args)) {
+    return 1;
   }
 
-  FILE * processesFile = fopen(file, "r");
+  FILE * processesFile = fopen(args.file, "r");
 
   if (processesFile == NULL) return 1;
 
-  Process processes[MAX_PROCESSES], p;
+  Process processes[MAX_PROCESSES];
+  int processesCount = 0;
 
+  Process p;
   p.memoryStart = -1;
   while (fscanf(processesFile, "%d %s %d %d", &
       p.arrival, p.name, & p.time, & p.memory) == 4) processes[processesCount++] = p;
@@ -63,12 +32,12 @@ int main(int argc, char **argv) {
 
   qsort(processes, processesCount, sizeof(Process), compareProcess);
 
-  scheduler(processes, processesCount, scheduleChoice, memoryChoice, quantum);
+  scheduler(processes, processesCount, args.memoryChoice, args.quantum, !args.schedule);
 
   return 0;
 }
 
-void scheduler(Process processes[], int processCount, int scheduleChoice, int memoryChoice, int quantum) {
+void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, int sjf) {
 
   int totalTime = 0, lastExecuted = -1, turnaround = 0, prevProcess = 0, memory[MEMORY_CAPACITY], remain = processCount; // Last process, avoid reprint
 
@@ -94,9 +63,9 @@ void scheduler(Process processes[], int processCount, int scheduleChoice, int me
     for (int i = 0; i < processCount; i++) {
 
       // Print when processes are ready
-      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, scheduleChoice, 0, &readyTime);
+      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
 
-      if (!scheduleChoice) {
+      if (sjf) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
@@ -123,7 +92,7 @@ void scheduler(Process processes[], int processCount, int scheduleChoice, int me
           maxOverhead, & totalOverhead);
 
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, scheduleChoice, 1, &readyTime);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime);
           modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
