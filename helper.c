@@ -104,7 +104,7 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
 void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int scheduleChoice, int offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
-        int rrCheck = !scheduleChoice ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1),
+        int rrCheck = scheduleChoice ? 0 : (nextFree(memory, processes, processCount, processes[i].memory) != -1),
           arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
         if (processes[i].memoryStart == -1 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
