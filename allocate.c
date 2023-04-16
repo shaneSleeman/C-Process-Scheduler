@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             compareProcess);
 
 	scheduler(processes, processesCount, args.memoryChoice, 
-            args.quantum, args.scheduleChoice);
+            args.quantum, !args.scheduleChoice);
 
 	return 0;
 }
