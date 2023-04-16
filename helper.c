@@ -1,23 +1,23 @@
 #include "helper.h"
 #include "process.h"
 
-int lowerTime(int totalTime, bool executed[], Process processes[], int processCount, int quantum) {
+int lowerTime(int totalTime, int remainingTime[], Process processes[], int processCount, int quantum) {
     int n = 0, atLeast = totalTime - quantum;
     for(int i = 1; i < processCount; i++) {
         if(processes[i].arrival < atLeast &&
-                executed[i] != true) n++;
+                remainingTime[i] > 0) n++;
     }
     return n;
 }
 
 // Finds the shortest remaining process
-int shortestProcess(Process processes[], int processCount, int totalTime, bool executed[]) {
+int shortestProcess(Process processes[], int processCount, int totalTime, int remainingTime[]) {
     int shortest = EMPTY, minimum = INT_MAX;
 
     // Find the index of the shortest non-executed process
     // Always begins with the first process
     for (int i = 0; i < processCount; i++) {
-        if (executed[i] == false &&
+        if (remainingTime[i] > 0 &&
                 processes[i].time < minimum &&
                 processes[i].arrival <= totalTime) {
             shortest = i;
@@ -60,9 +60,7 @@ void modifyMemory(int memory[], int i, int start, int length, int fill) {
 // Simplifies use of quantum time by checking
 // arrival times are multiples of quantum
 int lowestMultiple(int n, int i) {
-    int result = (n / i) * i;
-    if (result < n) result += i;
-    return result;
+    return n + (i - (n % i)) % i;
 }
 
 // Next free memory location for a given memory size
@@ -100,7 +98,7 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
 void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool useSJF, bool offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
-        int rrCheck = useSJF ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
+        bool rrCheck = useSJF ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
           arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
         if (processes[i].memoryStart == EMPTY && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
