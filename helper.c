@@ -97,7 +97,7 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     return EMPTY;
 }
 
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, int offset, int *readyTime) {
+void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, bool offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
         int rrCheck = sjf ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
@@ -131,7 +131,7 @@ int compareProcess(const void *a, const void *b) {
 
 bool parseArguments(int argc, char **argv, Arguments *args) {
     args->file = NULL;
-    args->schedule = false;
+    args->scheduleChoice = false;
     args->memoryChoice = false;
     args->quantum = MIN_QUANTUM;
 
@@ -141,7 +141,7 @@ bool parseArguments(int argc, char **argv, Arguments *args) {
             else return false;
         } else if (!strcmp(argv[i], "-s")) {
             if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-                args->schedule = true;
+                args->scheduleChoice = false;
                 i++;
             } 
             else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) i++;

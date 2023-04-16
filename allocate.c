@@ -25,12 +25,12 @@ int main(int argc, char **argv) {
 
   qsort(processes, processesCount, sizeof(Process), compareProcess);
 
-  scheduler(processes, processesCount, args.memoryChoice, args.quantum, !args.schedule);
+  scheduler(processes, processesCount, args.memoryChoice, args.quantum, args.scheduleChoice);
 
   return 0;
 }
 
-void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, bool sjf) {
+void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, bool scheduleChoice) {
 
   int totalTime = 0, lastExecuted = EMPTY, turnaround = 0, prevProcess = 0, memory[MEMORY_CAPACITY], remain = processCount; // Last process, avoid reprint
 
@@ -57,9 +57,9 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
     for (int i = 0; i < processCount; i++) {
 
       // Print when processes are ready
-      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
+      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, scheduleChoice, false, &readyTime);
 
-      if (sjf) {
+      if (scheduleChoice) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
@@ -86,7 +86,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
           maxOverhead, & totalOverhead);
 
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime);
+          readyProcess(processCount, totalTime, quantum, memory, processes, scheduleChoice, true, &readyTime);
           modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
