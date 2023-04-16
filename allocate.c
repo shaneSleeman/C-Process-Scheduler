@@ -7,7 +7,6 @@ void scheduler(Process processes[], int processCount,
 
 int main(int argc, char **argv)
 {
-	
     // Retrieve arguments and file
     Arguments args;
 	if (!parseArguments(argc, argv, &args)) return 1;

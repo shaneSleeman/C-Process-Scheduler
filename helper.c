@@ -23,7 +23,6 @@ int shortestProcess(Process processes[], int processCount,
 
 	for (int i = 0; i < processCount; i++)
 	{
-		
         // If shortest so far and arrived
         if (!executed[i] &&
 			processes[i].time < minimum &&
