@@ -32,7 +32,7 @@ int lowerTime(int totalTime, bool executed[], Process processes[], int processCo
 void modifyMemory(int memory[], int i, int start, int length, int fill);
 int lowestMultiple(int n, int i);
 int nextFree(int memory[], Process processes[], int processCount, int length);
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, int offset, int *readyTime);
+void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool useSJF, bool offset, int *readyTime);
 int compareProcess(const void *a, const void *b);
 bool parseArguments(int argc, char **argv, Arguments *args);
 
