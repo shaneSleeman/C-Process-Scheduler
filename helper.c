@@ -1,23 +1,23 @@
 #include "helper.h"
 #include "process.h"
 
-int lowerTime(int totalTime, int remainingTime[], Process processes[], int processCount, int quantum) {
+int lowerTime(int totalTime, bool executed[], Process processes[], int processCount, int quantum) {
     int n = 0, atLeast = totalTime - quantum;
     for(int i = 1; i < processCount; i++) {
         if(processes[i].arrival < atLeast &&
-                remainingTime[i] > 0) n++;
+                executed[i] != true) n++;
     }
     return n;
 }
 
 // Finds the shortest remaining process
-int shortestProcess(Process processes[], int processCount, int totalTime, int remainingTime[]) {
+int shortestProcess(Process processes[], int processCount, int totalTime, bool executed[]) {
     int shortest = EMPTY, minimum = INT_MAX;
 
     // Find the index of the shortest non-executed process
     // Always begins with the first process
     for (int i = 0; i < processCount; i++) {
-        if (remainingTime[i] > 0 &&
+        if (executed[i] == false &&
                 processes[i].time < minimum &&
                 processes[i].arrival <= totalTime) {
             shortest = i;
@@ -60,6 +60,10 @@ void modifyMemory(int memory[], int i, int start, int length, int fill) {
 // Simplifies use of quantum time by checking
 // arrival times are multiples of quantum
 int lowestMultiple(int n, int i) {
+    /*
+    int result = (n / i) * i;
+    if (result < n) result += i;
+    return result;*/
     return n + (i - (n % i)) % i;
 }
 

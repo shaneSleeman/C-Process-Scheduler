@@ -38,10 +38,10 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
   for (int i = 0; i < MEMORY_CAPACITY; i++) memory[i] = EMPTY;
 
   // Executed processes array and their remaining times
-  //bool executed[processCount];
+  bool executed[processCount];
   int remainingTime[processCount], prevRemainingTime[processCount];
   for (int i = 0; i < processCount; i++) {
-    //executed[i] = false;
+    executed[i] = false;
     remainingTime[i] = processes[i].time;
     prevRemainingTime[i] = EMPTY;
   }
@@ -60,7 +60,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
       if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, useSJF, false, &readyTime);
 
       if (useSJF) {
-        int shortest = shortestProcess(processes, processCount, totalTime, remainingTime);
+        int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
         if (shortest == EMPTY) {
@@ -78,7 +78,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         int quantums = 0;
         while (quantums < processes[shortest].time) quantums += quantum;
         totalTime += quantums;
-        //executed[shortest] = true;
+        executed[shortest] = true;
 
         remain--;
 
@@ -91,7 +91,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         }
 
         printf("%d,FINISHED,process_name=%s,proc_remaining=%d\n",
-          totalTime, processes[shortest].name, lowerTime(totalTime, remainingTime, processes, processCount, quantum));
+          totalTime, processes[shortest].name, lowerTime(totalTime, executed, processes, processCount, quantum));
           
       } else {
 
@@ -100,7 +100,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
         if (memoryChoice == 1) startedCheck = processes[i].memoryStart != EMPTY;
 
         // If appropriate arrival and not executed yet
-        if (remainingTime[i] > 0 && processes[i].arrival <= totalTime && startedCheck) {
+        if (executed[i] == false && processes[i].arrival <= totalTime && startedCheck) {
           totalTime += quantum;
 
           // Fix quantum skip bug
@@ -133,7 +133,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
           // Finish process when no more remaining time
           remainingTime[i] -= quantum;
           if (remainingTime[i] <= 0) {
-            //executed[i] = true;
+            executed[i] = true;
             remain--;
 
             updatePerformance(processes, totalTime, i, & turnaround, &

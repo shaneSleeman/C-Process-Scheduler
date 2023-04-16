@@ -25,10 +25,10 @@ typedef struct {
     int quantum;
 } Arguments;
 
-int shortestProcess(Process processes[], int processCount, int totalTime, int remainingtime[]);
+int shortestProcess(Process processes[], int processCount, int totalTime, bool executed[]);
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
 void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
-int lowerTime(int totalTime, int remainingTime[], Process processes[], int processCount, int quantum);
+int lowerTime(int totalTime, bool executed[], Process processes[], int processCount, int quantum);
 void modifyMemory(int memory[], int i, int start, int length, int fill);
 int lowestMultiple(int n, int i);
 int nextFree(int memory[], Process processes[], int processCount, int length);
