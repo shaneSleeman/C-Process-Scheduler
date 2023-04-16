@@ -9,7 +9,7 @@ int remaining(int totalTime, bool executed[],
 	for (int i = 1; i < processCount; i++)
 	{
 		if (processes[i].arrival < atLeast &&
-			executed[i] != true) n++;
+			!executed[i]) n++;
 	}
 
 	return n;
@@ -25,7 +25,7 @@ int shortestProcess(Process processes[], int processCount,
 	{
 		
         // If shortest so far and arrived
-        if (executed[i] == false &&
+        if (!executed[i] &&
 			processes[i].time < minimum &&
 			processes[i].arrival <= totalTime)
 		{
@@ -98,7 +98,7 @@ int nextFree(int memory[], Process processes[],
         // Else update location and tally
 		else
 		{
-			if (tally == 0) currentLocation = i;
+			if (!tally) currentLocation = i;
 			tally++;
 		}
 
@@ -112,7 +112,7 @@ int nextFree(int memory[], Process processes[],
 				minGap = gap;
 
 				// If gap is perfect
-				if (minGap == 0) return currentLocation;
+				if (!minGap) return currentLocation;
 			}
 		}
 	}
@@ -132,7 +132,7 @@ void readyProcess(int processCount, int totalTime,
 	for (int i = 0; i < processCount; i++)
 	{
 		// Different arrival for round robin
-        int rrCheck = scheduleChoice ? true : 
+        int isRR = scheduleChoice ? true : 
                 (nextFree(memory, processes, processCount, 
                 processes[i].memory) != EMPTY),
 			arrivalQuantum = lowestMultiple(
@@ -142,7 +142,7 @@ void readyProcess(int processCount, int totalTime,
         if (processes[i].memoryStart == EMPTY &&
                 ((offset && totalTime - quantum >= 
                 arrivalQuantum) || (!offset && totalTime >= 
-                arrivalQuantum && rrCheck)))
+                arrivalQuantum && isRR)))
 		{
             // Modify memory and print if free space 
 			int freeMemoryIndex = nextFree(memory, processes, 
@@ -187,7 +187,7 @@ int compareProcess(const void *a, const void *b)
 bool parseArguments(int argc, char **argv, Arguments *args)
 {
 	args->file = NULL;
-	args->scheduleChoice = false;
+	args->scheduleChoice = true;
 	args->memoryChoice = false;
 	args->quantum = MIN_QUANTUM;
 
@@ -202,7 +202,7 @@ bool parseArguments(int argc, char **argv, Arguments *args)
 		{
 			if (i + 1 < argc && !strcmp(argv[i + 1], "RR"))
 			{
-				args->scheduleChoice = true;
+				args->scheduleChoice = false;
 				i++;
 			}
 			else if (i + 1 < argc && 

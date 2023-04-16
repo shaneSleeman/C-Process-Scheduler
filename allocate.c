@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             compareProcess);
 
 	scheduler(processes, processesCount, args.memoryChoice, 
-            args.quantum, !args.scheduleChoice);
+            args.quantum, args.scheduleChoice);
 
 	return 0;
 }
@@ -130,11 +130,11 @@ void scheduler(Process processes[], int processCount,
                  * only start process if it's assigned
                  */
 				int startedCheck = 1;
-				if (memoryChoice == true) startedCheck = 
+				if (memoryChoice) startedCheck = 
                         processes[i].memoryStart != EMPTY;
 
 				// If appropriate arrival and not executed
-				if (executed[i] == false && 
+				if (!executed[i] && 
                         processes[i].arrival <= totalTime && 
                         startedCheck)
 				{
