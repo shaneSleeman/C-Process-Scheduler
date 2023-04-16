@@ -132,7 +132,7 @@ void readyProcess(int processCount, int totalTime,
 	for (int i = 0; i < processCount; i++)
 	{
 		// Different arrival for round robin
-        int rrCheck = scheduleChoice ? false : 
+        int rrCheck = scheduleChoice ? true : 
                 (nextFree(memory, processes, processCount, 
                 processes[i].memory) != EMPTY),
 			arrivalQuantum = lowestMultiple(

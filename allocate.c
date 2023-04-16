@@ -3,7 +3,7 @@
 #include "process.h"
 
 void scheduler(Process processes[], int processCount, 
-        int memoryChoice, int quantum, bool sjf);
+        int memoryChoice, int quantum, bool scheduleChoice);
 
 int main(int argc, char **argv)
 {
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             compareProcess);
 
 	scheduler(processes, processesCount, args.memoryChoice, 
-            args.quantum, !args.scheduleChoice);
+            args.quantum, args.scheduleChoice);
 
 	return 0;
 }
