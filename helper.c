@@ -1,163 +1,235 @@
 #include "helper.h"
 #include "process.h"
 
-int lowerTime(int totalTime, bool executed[], Process processes[], int processCount, int quantum) {
+// Retrieve non-executed processes remaining
+int remaining(int totalTime, bool executed[], 
+        Process processes[], int processCount, int quantum)
+{
     int n = 0, atLeast = totalTime - quantum;
-    for(int i = 1; i < processCount; i++) {
-        if(processes[i].arrival < atLeast &&
-                executed[i] != true) n++;
-    }
-    return n;
+	for (int i = 1; i < processCount; i++)
+	{
+		if (processes[i].arrival < atLeast &&
+			executed[i] != true) n++;
+	}
+
+	return n;
 }
 
-// Finds the shortest remaining process
-int shortestProcess(Process processes[], int processCount, int totalTime, bool executed[]) {
-    int shortest = EMPTY, minimum = INT_MAX;
+// Finds index of shortest remaining (non-executed) process
+int shortestProcess(Process processes[], int processCount, 
+        int totalTime, bool executed[])
+{
+	int shortest = EMPTY, minimum = INT_MAX;
 
-    // Find the index of the shortest non-executed process
-    // Always begins with the first process
-    for (int i = 0; i < processCount; i++) {
+	for (int i = 0; i < processCount; i++)
+	{
+		
+        // If shortest so far and arrived
         if (executed[i] == false &&
-                processes[i].time < minimum &&
-                processes[i].arrival <= totalTime) {
-            shortest = i;
-            minimum = processes[i].time;
-        }
-    }
+			processes[i].time < minimum &&
+			processes[i].arrival <= totalTime)
+		{
+			shortest = i;
+			minimum = processes[i].time;
+		}
+	}
 
-    return shortest;
+	return shortest;
 }
 
-void updatePerformance(Process processes[], int totalTime, int process, int *turnaround, 
-        double *maxOverhead, double *totalOverhead) {
-    
-    // Current process' turnaround and time overhead
-    int processTurnaround = totalTime - processes[process].arrival;
+// Update performance stats
+void updatePerformance(Process processes[], int totalTime, 
+        int process, int *turnaround,
+	double *maxOverhead, double *totalOverhead)
+{
+	// Current process turnaround and time overhead
+	int processTurnaround = totalTime - 
+            processes[process].arrival;
 
-    // Update turnaround
-    *turnaround += processTurnaround;
+	// Update turnaround
+	*turnaround += processTurnaround;
 
-    // Current process' overhead
-    double processOverhead = processTurnaround / (double)processes[process].time;
+	// Current process overhead
+	double processOverhead = processTurnaround / 
+            (double) processes[process].time;
 
-    // Track max overhead and update total overhead
-    if (processOverhead > *maxOverhead) *maxOverhead = processOverhead;
-    *totalOverhead += processOverhead;
+	// Track max overhead and update total overhead
+	if (processOverhead > *maxOverhead) 
+            *maxOverhead = processOverhead;
+	*totalOverhead += processOverhead;
 }
 
-void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount) {
-    printf("Turnaround time %d\n", (int)ceil(turnaround / (double)processCount));
-    printf("Time overhead %.2f %.2f\n", round(maxOverhead * PRECISION) / PRECISION, round(totalOverhead / processCount * PRECISION) / PRECISION);
+void printPerformance(int turnaround, double maxOverhead, 
+        double totalOverhead, int processCount)
+{
+	printf("Turnaround time %d\n", 
+            (int) ceil(turnaround / (double) processCount));
+	printf("Time overhead %.2f %.2f\n", 
+            round(maxOverhead *PRECISION) / PRECISION, 
+            round(totalOverhead / processCount *PRECISION) / 
+            PRECISION);
 }
 
-/* Assign memory start+length to i, the index of a process
- * Or clearing memory
-*/
-void modifyMemory(int memory[], int i, int start, int length, int fill) {
-    for(int j = start; j < start + length; j++) memory[j] = fill ? i : EMPTY;
+// Assign memory start to start+length, to process
+void modifyMemory(int memory[], int i, int start, 
+        int length, bool fill)
+{
+	for (int j = start; j < start + length; j++) 
+            memory[j] = fill ? i : EMPTY;
 }
 
-// Simplifies use of quantum time by checking
-// arrival times are multiples of quantum
-int lowestMultiple(int n, int i) {
-    int result = (n / i) * i;
-    if (result < n) result += i;
-    return result;
+// Returns quantum at or immediately after time n
+int lowestMultiple(int n, int i)
+{
+	return ((n + i - 1) / i) * i;
 }
 
-// Next free memory location for a given memory size
-// Returns EMPTY if memory is full i.e. has no free spot
-// Imperfect implementation, must fix for bestfit
-int nextFree(int memory[], Process processes[], int processCount, int length) {
-    int currentLocation = EMPTY, tally = 0, minGap = INT_MAX;
+// Best-fit memory location for a given memory size
+int nextFree(int memory[], Process processes[], 
+        int processCount, int length)
+{
+	int currentLocation = EMPTY, tally = 0, minGap = INT_MAX;
 
-    for(int i = 0; i < MEMORY_CAPACITY; i++) {
-        if(memory[i] != EMPTY) tally = 0;
-        else {
-            if(tally == 0) currentLocation = i;
-            tally++;
-        }
-        
-        if(tally >= length) {
-            int gap = tally - length;
+	for (int i = 0; i < MEMORY_CAPACITY; i++)
+	{
+		// Reset tally count if encountered used memory
+        if (memory[i] != EMPTY) tally = 0;
 
-            if(gap < minGap) {
-                minGap = gap;
+        // Else update location and tally
+		else
+		{
+			if (tally == 0) currentLocation = i;
+			tally++;
+		}
 
-                // If gap is perfect
-                if(minGap == 0) return currentLocation;
-            }
-        }
-    }
+        // Track smallest gap, return perfect fit
+		if (tally >= length)
+		{
+			int gap = tally - length;
 
-    // If no perfect fit, return best-fit
-    if(minGap != INT_MAX) return currentLocation;
+			if (gap < minGap)
+			{
+				minGap = gap;
 
-    // When there's no free location
-    return EMPTY;
+				// If gap is perfect
+				if (minGap == 0) return currentLocation;
+			}
+		}
+	}
+
+	// If no perfect fit, return best-fit i.e. smallest gap
+	if (minGap != INT_MAX) return currentLocation;
+
+	// When no free location
+	return EMPTY;
 }
 
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, bool offset, int *readyTime) {
-    for (int i = 0; i < processCount; i++) {
+// Assign memory to ready processes, and print them
+void readyProcess(int processCount, int totalTime, 
+        int quantum, int memory[], Process processes[], 
+        bool scheduleChoice, bool offset, int *readyTime)
+{
+	for (int i = 0; i < processCount; i++)
+	{
+		// Different arrival for round robin
+        int rrCheck = scheduleChoice ? false : 
+                (nextFree(memory, processes, processCount, 
+                processes[i].memory) != EMPTY),
+			arrivalQuantum = lowestMultiple(
+                        processes[i].arrival, quantum);
 
-        int rrCheck = sjf ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
-          arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
+		// Assign memory if unassigned
+        if (processes[i].memoryStart == EMPTY &&
+                ((offset && totalTime - quantum >= 
+                arrivalQuantum) || (!offset && totalTime >= 
+                arrivalQuantum && rrCheck)))
+		{
+            // Modify memory and print if free space 
+			int freeMemoryIndex = nextFree(memory, processes, 
+                    processCount, processes[i].memory);
 
-        if (processes[i].memoryStart == EMPTY && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
-            int freeMemoryIndex = nextFree(memory, processes, processCount, processes[i].memory);
+			if (freeMemoryIndex != EMPTY)
+			{
+				processes[i].memoryStart = freeMemoryIndex;
+				modifyMemory(memory, i, 
+                        processes[i].memoryStart, 
+                        processes[i].memory, true);
+				int printTime = offset ? arrivalQuantum : 
+                        lowestMultiple(totalTime, quantum);
 
-            if (freeMemoryIndex != EMPTY) {
-                processes[i].memoryStart = freeMemoryIndex;
-                modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
-                int printTime = offset ? arrivalQuantum : lowestMultiple(totalTime, quantum);
+				printf("%d,READY,process_name=%s,"
+                        "assigned_at=%d\n", printTime, 
+                        processes[i].name, 
+                        processes[i].memoryStart);
 
-                printf("%d,READY,process_name=%s,assigned_at=%d\n", printTime, processes[i].name, processes[i].memoryStart);
-
-                if (!offset) *readyTime = totalTime;
-            }
-        }
-    }
+				if (!offset) *readyTime = totalTime;
+			}
+		}
+	}
 }
 
-int compareProcess(const void *a, const void *b) {
-    const Process *processA = (const Process *)a, *processB = (const Process *)b;
+// Process ordering, by name after arrival and times
+int compareProcess(const void *a, const void *b)
+{
+	const Process *processA = (const Process *) a,
+		*processB = (const Process *) b;
 
-    if (processA->arrival != processB->arrival) return processA->arrival - processB->arrival;
+	if (processA->arrival != processB->arrival) 
+            return processA->arrival - processB->arrival;
 
-    if (processA->time != processB->time) return processA->time - processB->time;
+	if (processA->time != processB->time) 
+            return processA->time - processB->time;
 
-    return strcmp(processA->name, processB->name);
+	return strcmp(processA->name, processB->name);
 }
 
-bool parseArguments(int argc, char **argv, Arguments *args) {
-    args->file = NULL;
-    args->scheduleChoice = false;
-    args->memoryChoice = false;
-    args->quantum = MIN_QUANTUM;
+// Only allows valid arguments
+bool parseArguments(int argc, char **argv, Arguments *args)
+{
+	args->file = NULL;
+	args->scheduleChoice = false;
+	args->memoryChoice = false;
+	args->quantum = MIN_QUANTUM;
 
-    for (int i = 1; i < argc; i++) {
-        if (!strcmp(argv[i], "-f")) {
-            if (i + 1 < argc) args->file = argv[++i];
-            else return false;
-        } else if (!strcmp(argv[i], "-s")) {
-            if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-                args->scheduleChoice = false;
-                i++;
-            } 
-            else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) i++;
-            else return false;
-        } else if (!strcmp(argv[i], "-m")) {
-            if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-                args->memoryChoice = true;
-                i++;
-            } 
-            else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) i++;
-            else return false;
-        } else if (!strcmp(argv[i], "-q")) {
-            if (i + 1 < argc && atoi(argv[i + 1]) >= MIN_QUANTUM && atoi(argv[i + 1]) <= MAX_QUANTUM) args->quantum = atoi(argv[++i]);
-            else return false;
-        }
-    }
+	for (int i = 1; i < argc; i++)
+	{
+		if (!strcmp(argv[i], "-f"))
+		{
+			if (i + 1 < argc) args->file = argv[++i];
+			else return false;
+		}
+		else if (!strcmp(argv[i], "-s"))
+		{
+			if (i + 1 < argc && !strcmp(argv[i + 1], "RR"))
+			{
+				args->scheduleChoice = false;
+				i++;
+			}
+			else if (i + 1 < argc && 
+                    !strcmp(argv[i + 1], "SJF")) i++;
+			else return false;
+		}
+		else if (!strcmp(argv[i], "-m"))
+		{
+			if (i + 1 < argc && !strcmp(argv[i + 1], 
+                    "best-fit"))
+			{
+				args->memoryChoice = true;
+				i++;
+			}
+			else if (i + 1 < argc && !strcmp(argv[i + 1], 
+                    "infinite")) i++;
+			else return false;
+		}
+		else if (!strcmp(argv[i], "-q"))
+		{
+			if (i + 1 < argc && atoi(argv[i + 1]) >= 
+                    MIN_QUANTUM && atoi(argv[i + 1]) <= 
+                    MAX_QUANTUM) 
+                    args->quantum = atoi(argv[++i]);
+			else return false;
+		}
+	}
 
-    return args->file != NULL;
+	return args->file != NULL;
 }

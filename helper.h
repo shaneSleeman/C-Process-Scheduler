@@ -11,7 +11,7 @@
 #include <stdbool.h>
 
 #define MEMORY_CAPACITY 2048
-#define MAX_PROCESSES INT16_MAX // Largest int that doesn't cause error
+#define MAX_PROCESSES INT16_MAX // Large max processes
 #define NUM_ARGS 4
 #define MIN_QUANTUM 1
 #define MAX_QUANTUM 3
@@ -25,14 +25,23 @@ typedef struct {
     int quantum;
 } Arguments;
 
-int shortestProcess(Process processes[], int processCount, int totalTime, bool executed[]);
-void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount);
-void updatePerformance(Process processes[], int totalTime, int i, int *turnaround, double *maxOverhead, double *totalOverhead);
-int lowerTime(int totalTime, bool executed[], Process processes[], int processCount, int quantum);
-void modifyMemory(int memory[], int i, int start, int length, int fill);
+int shortestProcess(Process processes[], int processCount, 
+        int totalTime, bool executed[]);
+void printPerformance(int turnaround, double maxOverhead, 
+        double totalOverhead, int processCount);
+void updatePerformance(Process processes[], int totalTime, 
+        int i, int *turnaround, double *maxOverhead, 
+        double *totalOverhead);
+int remaining(int totalTime, bool executed[], 
+        Process processes[], int processCount, int quantum);
+void modifyMemory(int memory[], int i, int start, int length, 
+        bool fill);
 int lowestMultiple(int n, int i);
-int nextFree(int memory[], Process processes[], int processCount, int length);
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, bool offset, int *readyTime);
+int nextFree(int memory[], Process processes[], 
+        int processCount, int length);
+void readyProcess(int processCount, int totalTime, 
+        int quantum, int memory[], Process processes[], 
+        bool scheduleChoice, bool offset, int *readyTime);
 int compareProcess(const void *a, const void *b);
 bool parseArguments(int argc, char **argv, Arguments *args);
 
