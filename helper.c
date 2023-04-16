@@ -60,11 +60,9 @@ void modifyMemory(int memory[], int i, int start, int length, int fill) {
 // Simplifies use of quantum time by checking
 // arrival times are multiples of quantum
 int lowestMultiple(int n, int i) {
-    /*
     int result = (n / i) * i;
     if (result < n) result += i;
-    return result;*/
-    return n + (i - (n % i)) % i;
+    return result;
 }
 
 // Next free memory location for a given memory size
@@ -99,10 +97,10 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     return EMPTY;
 }
 
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool useSJF, bool offset, int *readyTime) {
+void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, int offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
-        bool rrCheck = useSJF ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
+        int rrCheck = sjf ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
           arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
         if (processes[i].memoryStart == EMPTY && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {

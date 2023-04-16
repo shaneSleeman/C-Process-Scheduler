@@ -1,9 +1,9 @@
-// Defined helper functions and process struct
+// Defined helper function
 #include "helper.h"
 #include "process.h"
 
 void scheduler(Process processes[], int processCount,
-  int memoryChoice, int quantum, bool useSJF);
+  int memoryChoice, int quantum, bool sjf);
 
 int main(int argc, char **argv) {
 
@@ -14,23 +14,23 @@ int main(int argc, char **argv) {
   if (processesFile == NULL) return 1;
 
   Process processes[MAX_PROCESSES];
-  int processCount = 0;
+  int processesCount = 0;
 
   Process p;
   p.memoryStart = EMPTY;
   while (fscanf(processesFile, "%d %s %d %d", &
-      p.arrival, p.name, & p.time, & p.memory) == NUM_ARGS) processes[processCount++] = p;
+      p.arrival, p.name, & p.time, & p.memory) == NUM_ARGS) processes[processesCount++] = p;
 
   fclose(processesFile);
 
-  qsort(processes, processCount, sizeof(Process), compareProcess);
+  qsort(processes, processesCount, sizeof(Process), compareProcess);
 
-  scheduler(processes, processCount, args.memoryChoice, args.quantum, !args.schedule);
+  scheduler(processes, processesCount, args.memoryChoice, args.quantum, !args.schedule);
 
   return 0;
 }
 
-void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, bool useSJF) {
+void scheduler(Process processes[], int processCount, int memoryChoice, int quantum, bool sjf) {
 
   int totalTime = 0, lastExecuted = EMPTY, turnaround = 0, prevProcess = 0, memory[MEMORY_CAPACITY], remain = processCount; // Last process, avoid reprint
 
@@ -57,9 +57,9 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
     for (int i = 0; i < processCount; i++) {
 
       // Print when processes are ready
-      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, useSJF, false, &readyTime);
+      if(memoryChoice) readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 0, &readyTime);
 
-      if (useSJF) {
+      if (sjf) {
         int shortest = shortestProcess(processes, processCount, totalTime, executed);
 
         // If none available to execute
@@ -86,7 +86,7 @@ void scheduler(Process processes[], int processCount, int memoryChoice, int quan
           maxOverhead, & totalOverhead);
 
         if (memoryChoice) {
-          readyProcess(processCount, totalTime, quantum, memory, processes, useSJF, true, &readyTime);
+          readyProcess(processCount, totalTime, quantum, memory, processes, sjf, 1, &readyTime);
           modifyMemory(memory, shortest, processes[shortest].memoryStart, processes[shortest].memory, 0);
         }
 
