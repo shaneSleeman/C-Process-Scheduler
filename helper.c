@@ -202,7 +202,7 @@ bool parseArguments(int argc, char **argv, Arguments *args)
 		{
 			if (i + 1 < argc && !strcmp(argv[i + 1], "RR"))
 			{
-				args->scheduleChoice = false;
+				args->scheduleChoice = true;
 				i++;
 			}
 			else if (i + 1 < argc && 
