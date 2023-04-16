@@ -1,28 +1,23 @@
 #include "helper.h"
 #include "process.h"
-#include <math.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <stdlib.h>
 
-int lowerTime(int totalTime, int executed[], Process processes[], int processCount, int quantum) {
+int lowerTime(int totalTime, bool executed[], Process processes[], int processCount, int quantum) {
     int n = 0, atLeast = totalTime - quantum;
     for(int i = 1; i < processCount; i++) {
         if(processes[i].arrival < atLeast &&
-                executed[i] != 1) n++;
+                executed[i] != true) n++;
     }
     return n;
 }
 
 // Finds the shortest remaining process
-int shortestProcess(Process processes[], int processCount, int totalTime, int executed[]) {
-    int shortest = -1, minimum = INT_MAX;
+int shortestProcess(Process processes[], int processCount, int totalTime, bool executed[]) {
+    int shortest = EMPTY, minimum = INT_MAX;
 
     // Find the index of the shortest non-executed process
     // Always begins with the first process
     for (int i = 0; i < processCount; i++) {
-        if (executed[i] == 0 &&
+        if (executed[i] == false &&
                 processes[i].time < minimum &&
                 processes[i].arrival <= totalTime) {
             shortest = i;
@@ -52,14 +47,14 @@ void updatePerformance(Process processes[], int totalTime, int process, int *tur
 
 void printPerformance(int turnaround, double maxOverhead, double totalOverhead, int processCount) {
     printf("Turnaround time %d\n", (int)ceil(turnaround / (double)processCount));
-    printf("Time overhead %.2f %.2f\n", round(maxOverhead * 100) / 100, round(totalOverhead / processCount * 100) / 100);
+    printf("Time overhead %.2f %.2f\n", round(maxOverhead * PRECISION) / PRECISION, round(totalOverhead / processCount * PRECISION) / PRECISION);
 }
 
 /* Assign memory start+length to i, the index of a process
  * Or clearing memory
 */
 void modifyMemory(int memory[], int i, int start, int length, int fill) {
-    for(int j = start; j < start + length; j++) memory[j] = fill ? i : -1;
+    for(int j = start; j < start + length; j++) memory[j] = fill ? i : EMPTY;
 }
 
 // Simplifies use of quantum time by checking
@@ -71,13 +66,13 @@ int lowestMultiple(int n, int i) {
 }
 
 // Next free memory location for a given memory size
-// Returns -1 if memory is full i.e. has no free spot
+// Returns EMPTY if memory is full i.e. has no free spot
 // Imperfect implementation, must fix for bestfit
 int nextFree(int memory[], Process processes[], int processCount, int length) {
-    int currentLocation = -1, tally = 0, minGap = INT_MAX;
+    int currentLocation = EMPTY, tally = 0, minGap = INT_MAX;
 
     for(int i = 0; i < MEMORY_CAPACITY; i++) {
-        if(memory[i] != -1) tally = 0;
+        if(memory[i] != EMPTY) tally = 0;
         else {
             if(tally == 0) currentLocation = i;
             tally++;
@@ -99,19 +94,19 @@ int nextFree(int memory[], Process processes[], int processCount, int length) {
     if(minGap != INT_MAX) return currentLocation;
 
     // When there's no free location
-    return -1;
+    return EMPTY;
 }
 
-void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], int sjf, int offset, int *readyTime) {
+void readyProcess(int processCount, int totalTime, int quantum, int memory[], Process processes[], bool sjf, int offset, int *readyTime) {
     for (int i = 0; i < processCount; i++) {
 
-        int rrCheck = sjf ? 1 : (nextFree(memory, processes, processCount, processes[i].memory) != -1),
+        int rrCheck = sjf ? true : (nextFree(memory, processes, processCount, processes[i].memory) != EMPTY),
           arrivalQuantum = lowestMultiple(processes[i].arrival, quantum);
 
-        if (processes[i].memoryStart == -1 && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
+        if (processes[i].memoryStart == EMPTY && ((offset && totalTime - quantum >= arrivalQuantum) || (!offset && totalTime >= arrivalQuantum && rrCheck))) {
             int freeMemoryIndex = nextFree(memory, processes, processCount, processes[i].memory);
 
-            if (freeMemoryIndex != -1) {
+            if (freeMemoryIndex != EMPTY) {
                 processes[i].memoryStart = freeMemoryIndex;
                 modifyMemory(memory, i, processes[i].memoryStart, processes[i].memory, 1);
                 int printTime = offset ? arrivalQuantum : lowestMultiple(totalTime, quantum);
@@ -134,43 +129,33 @@ int compareProcess(const void *a, const void *b) {
     return strcmp(processA->name, processB->name);
 }
 
-int parseArguments(int argc, char **argv, Arguments *args) {
+bool parseArguments(int argc, char **argv, Arguments *args) {
     args->file = NULL;
-    args->schedule = 0;
-    args->memoryChoice = 0;
-    args->quantum = 0;
+    args->schedule = false;
+    args->memoryChoice = false;
+    args->quantum = MIN_QUANTUM;
 
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-f")) {
-            if (i + 1 < argc) {
-                args->file = argv[++i];
-            } else {
-                return 0;
-            }
+            if (i + 1 < argc) args->file = argv[++i];
+            else return false;
         } else if (!strcmp(argv[i], "-s")) {
             if (i + 1 < argc && !strcmp(argv[i + 1], "RR")) {
-                args->schedule = 1;
+                args->schedule = true;
                 i++;
-            } else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) {
-                i++;
-            } else {
-                return 0;
-            }
+            } 
+            else if (i + 1 < argc && !strcmp(argv[i + 1], "SJF")) i++;
+            else return false;
         } else if (!strcmp(argv[i], "-m")) {
             if (i + 1 < argc && !strcmp(argv[i + 1], "best-fit")) {
-                args->memoryChoice = 1;
+                args->memoryChoice = true;
                 i++;
-            } else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) {
-                i++;
-            } else {
-                return 0;
-            }
+            } 
+            else if (i + 1 < argc && !strcmp(argv[i + 1], "infinite")) i++;
+            else return false;
         } else if (!strcmp(argv[i], "-q")) {
-            if (i + 1 < argc && atoi(argv[i + 1]) >= 1 && atoi(argv[i + 1]) <= 3) {
-                args->quantum = atoi(argv[++i]);
-            } else {
-                return 0;
-            }
+            if (i + 1 < argc && atoi(argv[i + 1]) >= MIN_QUANTUM && atoi(argv[i + 1]) <= MAX_QUANTUM) args->quantum = atoi(argv[++i]);
+            else return false;
         }
     }
 
