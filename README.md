@@ -27,7 +27,7 @@ This repository contains a process scheduler simulator written in C. The program
 1. Clone this repository using git:
 
 ```
-git clone https://github.com/username/process-scheduler.git
+git clone https://github.com/shaneSleeman/process-scheduler.git
 ```
 
 2. Change to the project's directory:
